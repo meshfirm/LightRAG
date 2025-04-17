@@ -30,6 +30,7 @@ WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 COPY ./lightrag ./lightrag
 COPY ./lightrag_multitenant ./lightrag_multitenant
+COPY ./app ./app
 COPY setup.py .
 
 RUN pip install .

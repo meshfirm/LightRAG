@@ -1,6 +1,5 @@
 """
-Multi-tenant integration for LightRAG server
-This module integrates the multi-tenant functionality with the existing LightRAG server.
+Simple multi-tenant integration for LightRAG server
 """
 
 import os
@@ -10,8 +9,8 @@ from fastapi import FastAPI
 
 # Import our custom modules
 from register_storage import register_storages
-from tenant_auth_middleware import tenant_manager
-from tenant_routes import router as tenant_router
+from simple_tenant_middleware import tenant_manager
+from simple_tenant_routes import router as tenant_router
 
 # Set up Neo4j configuration from environment
 def configure_neo4j():
@@ -86,6 +85,6 @@ def integrate_with_server(app: FastAPI):
     
     # Log integration
     from lightrag.utils import logger
-    logger.info("Multi-tenant functionality integrated with LightRAG server")
+    logger.info("Simple multi-tenant functionality integrated with LightRAG server")
     
     return app

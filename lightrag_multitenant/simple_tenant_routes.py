@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Body
+from fastapi import APIRouter, HTTPException, status, Body, Query
 from typing import Dict, Any, List, Optional
 
 from lightrag import QueryParam
-from tenant_auth_middleware import TenantDepends
+from simple_tenant_middleware import TenantDepends
 
-# Create tenant-specific router
+# Create tenant-specific router with user_id parameter in all routes
 router = APIRouter(prefix="/tenant", tags=["Multi-Tenant Operations"])
 
 @router.post("/documents/insert")
