@@ -275,12 +275,12 @@ def get_available_embedding_models() -> dict[str, dict]:
     return {
         "voyage-3-large": {
             "context_length": 32000,
-            "dimension": 1024,
+            "dimension": 1536,
             "description": "Best general-purpose and multilingual",
         },
         "voyage-3": {
             "context_length": 32000,
-            "dimension": 1024,
+            "dimension": 1536,
             "description": "General-purpose and multilingual",
         },
         "voyage-3-lite": {
@@ -290,22 +290,22 @@ def get_available_embedding_models() -> dict[str, dict]:
         },
         "voyage-code-3": {
             "context_length": 32000,
-            "dimension": 1024,
+            "dimension": 1536,
             "description": "Optimized for code",
         },
         "voyage-finance-2": {
             "context_length": 32000,
-            "dimension": 1024,
+            "dimension": 1536,
             "description": "Optimized for finance",
         },
         "voyage-law-2": {
             "context_length": 16000,
-            "dimension": 1024,
+            "dimension": 1536,
             "description": "Optimized for legal",
         },
         "voyage-multimodal-3": {
             "context_length": 32000,
-            "dimension": 1024,
+            "dimension": 1536,
             "description": "Multimodal text and images",
         },
     }

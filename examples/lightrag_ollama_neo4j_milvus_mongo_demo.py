@@ -22,9 +22,9 @@ os.environ["MONGO_DATABASE"] = "LightRAG"
 # neo4j
 BATCH_SIZE_NODES = 500
 BATCH_SIZE_EDGES = 100
-os.environ["NEO4J_URI"] = "bolt://localhost:7687"
+os.environ["NEO4J_URI"] = "neo4j://35.187.106.195:7687"
 os.environ["NEO4J_USERNAME"] = "neo4j"
-os.environ["NEO4J_PASSWORD"] = "neo4j"
+os.environ["NEO4J_PASSWORD"] = "magnet-spiral-parlor-ventura-burma-6321"
 
 # milvus
 os.environ["MILVUS_URI"] = "http://localhost:19530"
@@ -45,7 +45,7 @@ async def initialize_rag():
             "options": {"num_ctx": 32768},
         },
         embedding_func=EmbeddingFunc(
-            embedding_dim=1024,
+            embedding_dim=1536,
             max_token_size=8192,
             func=lambda texts: ollama_embed(
                 texts=texts, embed_model="bge-m3:latest", host="http://127.0.0.1:11434"

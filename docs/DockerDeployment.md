@@ -115,10 +115,10 @@ you can't just use localhost from docker, that's why you need to use host.docker
 2. Using with OpenAI:
 ```env
 LLM_BINDING=openai
-LLM_MODEL=gpt-3.5-turbo
+LLM_MODEL=gpt-4o
 EMBEDDING_BINDING=openai
-EMBEDDING_MODEL=text-embedding-ada-002
-OPENAI_API_KEY=your-api-key
+EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_API_KEY=sk-proj-lzztDfKbdjS2k8kO8ezxT3BlbkFJ0BnE3K2b1zlY7U7wPv0N
 ```
 
 ### API Usage

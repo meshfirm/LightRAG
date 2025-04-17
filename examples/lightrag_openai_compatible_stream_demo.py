@@ -21,16 +21,16 @@ async def initialize_rag():
     rag = LightRAG(
         working_dir=WORKING_DIR,
         llm_model_func=openai_complete,
-        llm_model_name="qwen2.5-14b-instruct@4bit",
+        llm_model_name="text-embedding-small-3",
         llm_model_max_async=4,
         llm_model_max_token_size=32768,
         llm_model_kwargs={"base_url": "http://127.0.0.1:1234/v1", "api_key": api_key},
         embedding_func=EmbeddingFunc(
-            embedding_dim=1024,
+            embedding_dim=1536,
             max_token_size=8192,
             func=lambda texts: openai_embed(
                 texts=texts,
-                model="text-embedding-bge-m3",
+                model="text-embedding-small-3",
                 base_url="http://127.0.0.1:1234/v1",
                 api_key=api_key,
             ),

@@ -38,7 +38,7 @@ async def initialize_rag():
         llm_model_max_token_size=32768,
         enable_llm_cache_for_entity_extract=True,
         embedding_func=EmbeddingFunc(
-            embedding_dim=1024,
+            embedding_dim=1536,
             max_token_size=8192,
             func=lambda texts: ollama_embedding(
                 texts, embed_model="bge-m3", host="http://localhost:11434"

@@ -99,7 +99,7 @@ async def initialize_rag():
         embedding_cache_config={"enabled": True, "similarity_threshold": 0.90},
         llm_model_func=llm_model_func,
         embedding_func=EmbeddingFunc(
-            embedding_dim=1024,
+            embedding_dim=1536,
             max_token_size=8192,
             func=embedding_func,
         ),

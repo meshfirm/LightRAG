@@ -22,7 +22,7 @@ async def fetch_data(url, headers, data):
 
 async def jina_embed(
     texts: list[str],
-    dimensions: int = 1024,
+    dimensions: int = 1536,
     late_chunking: bool = False,
     base_url: str = None,
     api_key: str = None,

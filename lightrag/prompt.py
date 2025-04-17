@@ -10,11 +10,27 @@ PROMPTS["DEFAULT_TUPLE_DELIMITER"] = "<|>"
 PROMPTS["DEFAULT_RECORD_DELIMITER"] = "##"
 PROMPTS["DEFAULT_COMPLETION_DELIMITER"] = "<|COMPLETE|>"
 
-PROMPTS["DEFAULT_ENTITY_TYPES"] = ["organization", "person", "geo", "event", "category"]
+PROMPTS["DEFAULT_ENTITY_TYPES"] = ["organisation", "team", "team member", "customer", "product", "feature", "insight", "decision", "document", "event", "metric", "timeline" ] # original setup: ["organization", "person", "geo", "event", "category"]
 
 PROMPTS["entity_extraction"] = """---Goal---
 Given a text document that is potentially relevant to this activity and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities.
 Use {language} as output language.
+
+---Entity Type Descriptions---
+Here are descriptions of each entity type to help with accurate identification:
+
+- organisation: A company, corporation, business entity, or larger organizational unit. Examples: Microsoft, Tesla, Government Agency.
+- team: A group of individuals working together on specific objectives within an organization. Examples: Design Team, Marketing Team, Development Team.
+- team member: An individual person who belongs to a team, with specific roles and responsibilities. Examples: Product Manager, Developer, Designer.
+- customer: An individual or organization that purchases or uses products/services. Examples: Enterprise Client, Consumer User.
+- product: A tangible or digital offering created to meet user needs. Examples: Mobile App, Cloud Service, Hardware Device.
+- feature: A distinct capability or component of a product. Examples: User Authentication, Export Functionality, Dashboard.
+- insight: A meaningful understanding gained from data, feedback, or observation. Examples: User Pain Point, Market Trend, Usage Pattern.
+- decision: A choice or determination made in the product development process. Examples: Feature Prioritization, Design Direction, Go-to-Market Strategy.
+- document: A written or digital record containing information. Examples: Requirements Specification, Design Brief, Meeting Notes.
+- event: A significant occurrence or milestone. Examples: Product Launch, Review Meeting, User Testing Session.
+- metric: A quantifiable measure used to track performance. Examples: User Engagement, Revenue Growth, Development Velocity.
+- timeline: A scheduled sequence of tasks, milestones, or deliverables. Examples: Roadmap, Release Schedule, Sprint Plan.
 
 ---Steps---
 1. Identify all entities. For each identified entity, extract the following information:
@@ -56,80 +72,169 @@ Output:"""
 PROMPTS["entity_extraction_examples"] = [
     """Example 1:
 
-Entity_types: [person, technology, mission, organization, location]
+Entity_types: [organisation, team, team member, customer, product, feature, insight, decision, document, event, metric, timeline]
 Text:
 ```
-while Alex clenched his jaw, the buzz of frustration dull against the backdrop of Taylor's authoritarian certainty. It was this competitive undercurrent that kept him alert, the sense that his and Jordan's shared commitment to discovery was an unspoken rebellion against Cruz's narrowing vision of control and order.
+The Product Development Team at TechNova Inc. held their weekly sprint review yesterday, where Sarah Chen, the lead product manager, presented findings from recent user testing sessions. Enterprise customer Acme Financial had reported difficulties with the dashboard export functionality in the company's flagship analytics platform, DataInsight Pro.
 
-Then Taylor did something unexpected. They paused beside Jordan and, for a moment, observed the device with something akin to reverence. "If this tech can be understood..." Taylor said, their voice quieter, "It could change the game for us. For all of us."
+"The CSV export feature is causing 30-second delays when users try to download large datasets," Sarah explained, sharing her screen with detailed error logs. "Our customer satisfaction score for this feature has dropped from 8.2 to 6.5 in the last quarter."
 
-The underlying dismissal earlier seemed to falter, replaced by a glimpse of reluctant respect for the gravity of what lay in their hands. Jordan looked up, and for a fleeting heartbeat, their eyes locked with Taylor's, a wordless clash of wills softening into an uneasy truce.
+The Engineering Team, represented by Dev Lead Alex Rodriguez, acknowledged the issue and proposed a solution involving database query optimization. After some discussion, the team decided to prioritize this fix for the next sprint cycle, aiming to reduce export times by at least 70%.
 
-It was a small transformation, barely perceptible, but one that Alex noted with an inward nod. They had all been brought here by different paths
+This decision was documented in the Sprint Planning Document, which outlines all development priorities for the upcoming two-week sprint. The Product Roadmap was also updated to reflect this change, with the improved export functionality scheduled for release in the v3.2 update next month.
+
+The Marketing Team will measure the success of this initiative using the System Performance Index and Customer Satisfaction scores after the next release.
 ```
 
 Output:
-("entity"{tuple_delimiter}"Alex"{tuple_delimiter}"person"{tuple_delimiter}"Alex is a character who experiences frustration and is observant of the dynamics among other characters."){record_delimiter}
-("entity"{tuple_delimiter}"Taylor"{tuple_delimiter}"person"{tuple_delimiter}"Taylor is portrayed with authoritarian certainty and shows a moment of reverence towards a device, indicating a change in perspective."){record_delimiter}
-("entity"{tuple_delimiter}"Jordan"{tuple_delimiter}"person"{tuple_delimiter}"Jordan shares a commitment to discovery and has a significant interaction with Taylor regarding a device."){record_delimiter}
-("entity"{tuple_delimiter}"Cruz"{tuple_delimiter}"person"{tuple_delimiter}"Cruz is associated with a vision of control and order, influencing the dynamics among other characters."){record_delimiter}
-("entity"{tuple_delimiter}"The Device"{tuple_delimiter}"technology"{tuple_delimiter}"The Device is central to the story, with potential game-changing implications, and is revered by Taylor."){record_delimiter}
-("relationship"{tuple_delimiter}"Alex"{tuple_delimiter}"Taylor"{tuple_delimiter}"Alex is affected by Taylor's authoritarian certainty and observes changes in Taylor's attitude towards the device."{tuple_delimiter}"power dynamics, perspective shift"{tuple_delimiter}7){record_delimiter}
-("relationship"{tuple_delimiter}"Alex"{tuple_delimiter}"Jordan"{tuple_delimiter}"Alex and Jordan share a commitment to discovery, which contrasts with Cruz's vision."{tuple_delimiter}"shared goals, rebellion"{tuple_delimiter}6){record_delimiter}
-("relationship"{tuple_delimiter}"Taylor"{tuple_delimiter}"Jordan"{tuple_delimiter}"Taylor and Jordan interact directly regarding the device, leading to a moment of mutual respect and an uneasy truce."{tuple_delimiter}"conflict resolution, mutual respect"{tuple_delimiter}8){record_delimiter}
-("relationship"{tuple_delimiter}"Jordan"{tuple_delimiter}"Cruz"{tuple_delimiter}"Jordan's commitment to discovery is in rebellion against Cruz's vision of control and order."{tuple_delimiter}"ideological conflict, rebellion"{tuple_delimiter}5){record_delimiter}
-("relationship"{tuple_delimiter}"Taylor"{tuple_delimiter}"The Device"{tuple_delimiter}"Taylor shows reverence towards the device, indicating its importance and potential impact."{tuple_delimiter}"reverence, technological significance"{tuple_delimiter}9){record_delimiter}
-("content_keywords"{tuple_delimiter}"power dynamics, ideological conflict, discovery, rebellion"){completion_delimiter}
+("entity"{tuple_delimiter}"TechNova Inc."{tuple_delimiter}"organisation"{tuple_delimiter}"TechNova Inc. is a technology company that develops and maintains DataInsight Pro, an analytics platform with dashboard functionality."){record_delimiter}
+("entity"{tuple_delimiter}"Product Development Team"{tuple_delimiter}"team"{tuple_delimiter}"The Product Development Team at TechNova Inc. that conducts weekly sprint reviews and makes decisions about product features and priorities."){record_delimiter}
+("entity"{tuple_delimiter}"Sarah Chen"{tuple_delimiter}"team member"{tuple_delimiter}"The lead product manager at TechNova Inc. who presented user testing findings and reported on customer satisfaction metrics."){record_delimiter}
+("entity"{tuple_delimiter}"Alex Rodriguez"{tuple_delimiter}"team member"{tuple_delimiter}"The Dev Lead representing the Engineering Team who acknowledged export functionality issues and proposed a database query optimization solution."){record_delimiter}
+("entity"{tuple_delimiter}"Acme Financial"{tuple_delimiter}"customer"{tuple_delimiter}"An enterprise customer of TechNova Inc. that reported difficulties with the dashboard export functionality in DataInsight Pro."){record_delimiter}
+("entity"{tuple_delimiter}"DataInsight Pro"{tuple_delimiter}"product"{tuple_delimiter}"TechNova Inc.'s flagship analytics platform that includes dashboard export functionality among other features."){record_delimiter}
+("entity"{tuple_delimiter}"CSV Export Feature"{tuple_delimiter}"feature"{tuple_delimiter}"A functionality in DataInsight Pro that allows users to download data in CSV format, currently experiencing 30-second delays with large datasets."){record_delimiter}
+("entity"{tuple_delimiter}"Dashboard Export Issue"{tuple_delimiter}"insight"{tuple_delimiter}"The finding that the CSV export feature causes 30-second delays when users try to download large datasets, impacting customer satisfaction."){record_delimiter}
+("entity"{tuple_delimiter}"Query Optimization Decision"{tuple_delimiter}"decision"{tuple_delimiter}"The decision to prioritize fixing the export functionality issue in the next sprint cycle through database query optimization, aiming to reduce export times by at least 70%."){record_delimiter}
+("entity"{tuple_delimiter}"Sprint Planning Document"{tuple_delimiter}"document"{tuple_delimiter}"A document outlining all development priorities for the upcoming two-week sprint, including the CSV export functionality fix."){record_delimiter}
+("entity"{tuple_delimiter}"Product Roadmap"{tuple_delimiter}"document"{tuple_delimiter}"A document that outlines planned product updates and features, which was updated to include the improved export functionality in v3.2."){record_delimiter}
+("entity"{tuple_delimiter}"Weekly Sprint Review"{tuple_delimiter}"event"{tuple_delimiter}"A regular meeting where the Product Development Team discusses progress, issues, and plans, held yesterday when the export functionality issue was addressed."){record_delimiter}
+("entity"{tuple_delimiter}"Customer Satisfaction Score"{tuple_delimiter}"metric"{tuple_delimiter}"A numerical measure of customer satisfaction with specific features, which dropped from 8.2 to 6.5 for the CSV export feature in the last quarter."){record_delimiter}
+("entity"{tuple_delimiter}"System Performance Index"{tuple_delimiter}"metric"{tuple_delimiter}"A metric that will be used alongside Customer Satisfaction scores to measure the success of the export functionality improvement."){record_delimiter}
+("entity"{tuple_delimiter}"Engineering Team"{tuple_delimiter}"team"{tuple_delimiter}"The technical team at TechNova Inc. responsible for implementing fixes and improvements to the product, represented by Dev Lead Alex Rodriguez."){record_delimiter}
+("entity"{tuple_delimiter}"Marketing Team"{tuple_delimiter}"team"{tuple_delimiter}"The team responsible for measuring success metrics after product releases."){record_delimiter}
+("entity"{tuple_delimiter}"v3.2 Release Timeline"{tuple_delimiter}"timeline"{tuple_delimiter}"The schedule for releasing the improved export functionality in the v3.2 update next month."){record_delimiter}
+("entity"{tuple_delimiter}"Two-Week Sprint Cycle"{tuple_delimiter}"timeline"{tuple_delimiter}"The upcoming development period during which the export functionality fix will be implemented."){record_delimiter}
+("relationship"{tuple_delimiter}"TechNova Inc."{tuple_delimiter}"DataInsight Pro"{tuple_delimiter}"TechNova Inc. develops and maintains DataInsight Pro as its flagship analytics platform."{tuple_delimiter}"product ownership, development"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"TechNova Inc."{tuple_delimiter}"Product Development Team"{tuple_delimiter}"The Product Development Team is part of TechNova Inc. and responsible for the company's products."{tuple_delimiter}"organizational structure, responsibility"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Sarah Chen"{tuple_delimiter}"Product Development Team"{tuple_delimiter}"Sarah Chen is the lead product manager of the Product Development Team."{tuple_delimiter}"team membership, leadership"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"Alex Rodriguez"{tuple_delimiter}"Engineering Team"{tuple_delimiter}"Alex Rodriguez is the Dev Lead of the Engineering Team."{tuple_delimiter}"team membership, leadership"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"Acme Financial"{tuple_delimiter}"Dashboard Export Issue"{tuple_delimiter}"Acme Financial reported the difficulties with the dashboard export functionality that led to the identified issue."{tuple_delimiter}"problem reporting, user feedback"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"DataInsight Pro"{tuple_delimiter}"CSV Export Feature"{tuple_delimiter}"The CSV Export Feature is a component of the DataInsight Pro product."{tuple_delimiter}"product feature, functionality"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Dashboard Export Issue"{tuple_delimiter}"Query Optimization Decision"{tuple_delimiter}"The Dashboard Export Issue directly led to the decision to implement query optimization in the next sprint."{tuple_delimiter}"problem solution, prioritization"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Query Optimization Decision"{tuple_delimiter}"Sprint Planning Document"{tuple_delimiter}"The Query Optimization Decision was documented in the Sprint Planning Document."{tuple_delimiter}"decision documentation, planning"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Query Optimization Decision"{tuple_delimiter}"Product Roadmap"{tuple_delimiter}"The Query Optimization Decision resulted in an update to the Product Roadmap to include the improved functionality in v3.2."{tuple_delimiter}"roadmap planning, feature scheduling"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"CSV Export Feature"{tuple_delimiter}"Customer Satisfaction Score"{tuple_delimiter}"Issues with the CSV Export Feature caused the Customer Satisfaction Score to drop from 8.2 to 6.5."{tuple_delimiter}"performance impact, user satisfaction"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Weekly Sprint Review"{tuple_delimiter}"Dashboard Export Issue"{tuple_delimiter}"The Dashboard Export Issue was presented and discussed during the Weekly Sprint Review."{tuple_delimiter}"issue identification, meeting topic"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Query Optimization Decision"{tuple_delimiter}"v3.2 Release Timeline"{tuple_delimiter}"The Query Optimization Decision is scheduled to be implemented according to the v3.2 Release Timeline."{tuple_delimiter}"implementation planning, release scheduling"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Marketing Team"{tuple_delimiter}"System Performance Index"{tuple_delimiter}"The Marketing Team will use the System Performance Index to measure the success of the export functionality improvement."{tuple_delimiter}"performance measurement, success tracking"{tuple_delimiter}8){record_delimiter}
+("content_keywords"{tuple_delimiter}"product development, performance issues, customer satisfaction, sprint planning, feature optimization, export functionality, data analytics, team collaboration"){completion_delimiter}
 #############################""",
     """Example 2:
 
-Entity_types: [company, index, commodity, market_trend, economic_policy, biological]
+Entity_types: [organisation, team, team member, customer, product, feature, insight, decision, document, event, metric, timeline]
 Text:
 ```
-Stock markets faced a sharp downturn today as tech giants saw significant declines, with the Global Tech Index dropping by 3.4% in midday trading. Analysts attribute the selloff to investor concerns over rising interest rates and regulatory uncertainty.
+GlobalSoft Solutions' Executive Team convened for the Q3 Strategic Planning Meeting last Tuesday. CEO Jennifer Park opened by highlighting a concerning trend from the latest Market Penetration Report: their enterprise collaboration tool, WorkStream, was losing market share to competitors offering better mobile experiences.
 
-Among the hardest hit, Nexon Technologies saw its stock plummet by 7.8% after reporting lower-than-expected quarterly earnings. In contrast, Omega Energy posted a modest 2.1% gain, driven by rising oil prices.
+The Customer Research Team, led by Marcus Washington, presented insights from recent interviews with key clients like Meridian Healthcare and BlueSky Retail. "82% of enterprise users now consider mobile access critical, compared to just 47% last year," Marcus explained. "Our app's user engagement score is 3.6/10, well below industry average of 7.2."
 
-Meanwhile, commodity markets reflected a mixed sentiment. Gold futures rose by 1.5%, reaching $2,080 per ounce, as investors sought safe-haven assets. Crude oil prices continued their rally, climbing to $87.60 per barrel, supported by supply constraints and strong demand.
+CTO Raj Patel and his Mobile Development Team proposed an aggressive redesign of the WorkStream mobile app, focusing on offline functionality and push notifications—two features frequently requested in customer feedback.
 
-Financial experts are closely watching the Federal Reserve's next move, as speculation grows over potential rate hikes. The upcoming policy announcement is expected to influence investor confidence and overall market stability.
+After thorough discussion, the leadership team decided to allocate additional resources to mobile development, targeting a complete app redesign for Q1 next year. This decision was documented in the updated Product Strategy Document and Annual Investment Plan.
+
+The project will follow an accelerated timeline, with design completion by November 15th, development by February 1st, and public release by March 20th. Success will be measured primarily through the Mobile User Satisfaction Index and app engagement metrics, with a target of 40% improvement in both areas within two months of release.
 ```
 
 Output:
-("entity"{tuple_delimiter}"Global Tech Index"{tuple_delimiter}"index"{tuple_delimiter}"The Global Tech Index tracks the performance of major technology stocks and experienced a 3.4% decline today."){record_delimiter}
-("entity"{tuple_delimiter}"Nexon Technologies"{tuple_delimiter}"company"{tuple_delimiter}"Nexon Technologies is a tech company that saw its stock decline by 7.8% after disappointing earnings."){record_delimiter}
-("entity"{tuple_delimiter}"Omega Energy"{tuple_delimiter}"company"{tuple_delimiter}"Omega Energy is an energy company that gained 2.1% in stock value due to rising oil prices."){record_delimiter}
-("entity"{tuple_delimiter}"Gold Futures"{tuple_delimiter}"commodity"{tuple_delimiter}"Gold futures rose by 1.5%, indicating increased investor interest in safe-haven assets."){record_delimiter}
-("entity"{tuple_delimiter}"Crude Oil"{tuple_delimiter}"commodity"{tuple_delimiter}"Crude oil prices rose to $87.60 per barrel due to supply constraints and strong demand."){record_delimiter}
-("entity"{tuple_delimiter}"Market Selloff"{tuple_delimiter}"market_trend"{tuple_delimiter}"Market selloff refers to the significant decline in stock values due to investor concerns over interest rates and regulations."){record_delimiter}
-("entity"{tuple_delimiter}"Federal Reserve Policy Announcement"{tuple_delimiter}"economic_policy"{tuple_delimiter}"The Federal Reserve's upcoming policy announcement is expected to impact investor confidence and market stability."){record_delimiter}
-("relationship"{tuple_delimiter}"Global Tech Index"{tuple_delimiter}"Market Selloff"{tuple_delimiter}"The decline in the Global Tech Index is part of the broader market selloff driven by investor concerns."{tuple_delimiter}"market performance, investor sentiment"{tuple_delimiter}9){record_delimiter}
-("relationship"{tuple_delimiter}"Nexon Technologies"{tuple_delimiter}"Global Tech Index"{tuple_delimiter}"Nexon Technologies' stock decline contributed to the overall drop in the Global Tech Index."{tuple_delimiter}"company impact, index movement"{tuple_delimiter}8){record_delimiter}
-("relationship"{tuple_delimiter}"Gold Futures"{tuple_delimiter}"Market Selloff"{tuple_delimiter}"Gold prices rose as investors sought safe-haven assets during the market selloff."{tuple_delimiter}"market reaction, safe-haven investment"{tuple_delimiter}10){record_delimiter}
-("relationship"{tuple_delimiter}"Federal Reserve Policy Announcement"{tuple_delimiter}"Market Selloff"{tuple_delimiter}"Speculation over Federal Reserve policy changes contributed to market volatility and investor selloff."{tuple_delimiter}"interest rate impact, financial regulation"{tuple_delimiter}7){record_delimiter}
-("content_keywords"{tuple_delimiter}"market downturn, investor sentiment, commodities, Federal Reserve, stock performance"){completion_delimiter}
+("entity"{tuple_delimiter}"GlobalSoft Solutions"{tuple_delimiter}"organisation"{tuple_delimiter}"A company that develops enterprise collaboration tools, including WorkStream, and is facing challenges with mobile market share."){record_delimiter}
+("entity"{tuple_delimiter}"Executive Team"{tuple_delimiter}"team"{tuple_delimiter}"The senior leadership group at GlobalSoft Solutions that makes strategic decisions about product direction and resource allocation."){record_delimiter}
+("entity"{tuple_delimiter}"Customer Research Team"{tuple_delimiter}"team"{tuple_delimiter}"The team responsible for gathering and analyzing customer feedback and market insights, led by Marcus Washington."){record_delimiter}
+("entity"{tuple_delimiter}"Mobile Development Team"{tuple_delimiter}"team"{tuple_delimiter}"The technical team at GlobalSoft Solutions responsible for developing mobile applications, working under CTO Raj Patel."){record_delimiter}
+("entity"{tuple_delimiter}"Jennifer Park"{tuple_delimiter}"team member"{tuple_delimiter}"The CEO of GlobalSoft Solutions who highlighted market share concerns during the strategic planning meeting."){record_delimiter}
+("entity"{tuple_delimiter}"Marcus Washington"{tuple_delimiter}"team member"{tuple_delimiter}"The leader of the Customer Research Team who presented insights from customer interviews and engagement metrics."){record_delimiter}
+("entity"{tuple_delimiter}"Raj Patel"{tuple_delimiter}"team member"{tuple_delimiter}"The CTO of GlobalSoft Solutions who proposed the mobile app redesign with his team."){record_delimiter}
+("entity"{tuple_delimiter}"Meridian Healthcare"{tuple_delimiter}"customer"{tuple_delimiter}"A key client of GlobalSoft Solutions that participated in recent interviews conducted by the Customer Research Team."){record_delimiter}
+("entity"{tuple_delimiter}"BlueSky Retail"{tuple_delimiter}"customer"{tuple_delimiter}"A key client of GlobalSoft Solutions that participated in recent interviews conducted by the Customer Research Team."){record_delimiter}
+("entity"{tuple_delimiter}"WorkStream"{tuple_delimiter}"product"{tuple_delimiter}"An enterprise collaboration tool developed by GlobalSoft Solutions that is losing market share due to inadequate mobile experience."){record_delimiter}
+("entity"{tuple_delimiter}"WorkStream Mobile App"{tuple_delimiter}"product"{tuple_delimiter}"The mobile version of WorkStream that has low user engagement scores and requires redesign."){record_delimiter}
+("entity"{tuple_delimiter}"Offline Functionality"{tuple_delimiter}"feature"{tuple_delimiter}"A capability frequently requested by customers that allows the mobile app to work without internet connection."){record_delimiter}
+("entity"{tuple_delimiter}"Push Notifications"{tuple_delimiter}"feature"{tuple_delimiter}"A mobile app feature frequently requested by customers that alerts users of important updates or actions."){record_delimiter}
+("entity"{tuple_delimiter}"Mobile Importance Trend"{tuple_delimiter}"insight"{tuple_delimiter}"The insight that 82% of enterprise users now consider mobile access critical, up from 47% last year."){record_delimiter}
+("entity"{tuple_delimiter}"Low Mobile Engagement"{tuple_delimiter}"insight"{tuple_delimiter}"The finding that the WorkStream mobile app's user engagement score is 3.6/10, well below the industry average of 7.2."){record_delimiter}
+("entity"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"decision"{tuple_delimiter}"The decision to allocate additional resources to mobile development for a complete app redesign targeted for Q1 next year."){record_delimiter}
+("entity"{tuple_delimiter}"Product Strategy Document"{tuple_delimiter}"document"{tuple_delimiter}"A document that was updated to reflect the decision to prioritize the mobile app redesign."){record_delimiter}
+("entity"{tuple_delimiter}"Annual Investment Plan"{tuple_delimiter}"document"{tuple_delimiter}"A document outlining resource allocation that was updated to include additional funding for mobile development."){record_delimiter}
+("entity"{tuple_delimiter}"Market Penetration Report"{tuple_delimiter}"document"{tuple_delimiter}"A report highlighting market trends, including WorkStream's loss of market share to competitors with better mobile experiences."){record_delimiter}
+("entity"{tuple_delimiter}"Q3 Strategic Planning Meeting"{tuple_delimiter}"event"{tuple_delimiter}"A meeting where GlobalSoft's Executive Team discussed strategic priorities, including the mobile app redesign."){record_delimiter}
+("entity"{tuple_delimiter}"Mobile User Satisfaction Index"{tuple_delimiter}"metric"{tuple_delimiter}"A key performance indicator that will be used to measure the success of the mobile app redesign, targeting a 40% improvement."){record_delimiter}
+("entity"{tuple_delimiter}"App Engagement Metrics"{tuple_delimiter}"metric"{tuple_delimiter}"Measurements of how users interact with the mobile app, currently at 3.6/10, with a target of 40% improvement after redesign."){record_delimiter}
+("entity"{tuple_delimiter}"Mobile Redesign Timeline"{tuple_delimiter}"timeline"{tuple_delimiter}"The schedule for completing the mobile app redesign, including design completion by November 15th, development by February 1st, and release by March 20th."){record_delimiter}
+("relationship"{tuple_delimiter}"GlobalSoft Solutions"{tuple_delimiter}"WorkStream"{tuple_delimiter}"GlobalSoft Solutions develops and owns WorkStream as their enterprise collaboration tool."{tuple_delimiter}"product ownership, development"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"GlobalSoft Solutions"{tuple_delimiter}"Executive Team"{tuple_delimiter}"The Executive Team leads GlobalSoft Solutions and makes strategic decisions for the company."{tuple_delimiter}"organizational leadership, governance"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Jennifer Park"{tuple_delimiter}"Executive Team"{tuple_delimiter}"Jennifer Park is the CEO and a key member of the Executive Team at GlobalSoft Solutions."{tuple_delimiter}"team membership, leadership"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"Marcus Washington"{tuple_delimiter}"Customer Research Team"{tuple_delimiter}"Marcus Washington leads the Customer Research Team at GlobalSoft Solutions."{tuple_delimiter}"team leadership, management"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"Raj Patel"{tuple_delimiter}"Mobile Development Team"{tuple_delimiter}"Raj Patel is the CTO who oversees the Mobile Development Team at GlobalSoft Solutions."{tuple_delimiter}"team oversight, technical leadership"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Meridian Healthcare"{tuple_delimiter}"Mobile Importance Trend"{tuple_delimiter}"Meridian Healthcare, as a key client, contributed to the insight about increasing importance of mobile access."{tuple_delimiter}"customer input, market trend"{tuple_delimiter}7){record_delimiter}
+("relationship"{tuple_delimiter}"WorkStream"{tuple_delimiter}"WorkStream Mobile App"{tuple_delimiter}"The WorkStream Mobile App is the mobile version of the WorkStream collaboration tool."{tuple_delimiter}"product component, mobile extension"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"WorkStream Mobile App"{tuple_delimiter}"Low Mobile Engagement"{tuple_delimiter}"The WorkStream Mobile App has a low user engagement score of 3.6/10, well below industry average."{tuple_delimiter}"performance issue, user dissatisfaction"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Low Mobile Engagement"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"The Low Mobile Engagement insight directly contributed to the Mobile Redesign Decision."{tuple_delimiter}"problem identification, solution planning"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"Product Strategy Document"{tuple_delimiter}"The Mobile Redesign Decision was documented in the updated Product Strategy Document."{tuple_delimiter}"decision documentation, strategic planning"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"Annual Investment Plan"{tuple_delimiter}"The Mobile Redesign Decision resulted in updates to the Annual Investment Plan to allocate additional resources."{tuple_delimiter}"resource allocation, financial planning"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Mobile Development Team"{tuple_delimiter}"Offline Functionality"{tuple_delimiter}"The Mobile Development Team will implement the Offline Functionality as part of the app redesign."{tuple_delimiter}"feature development, technical implementation"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Mobile Development Team"{tuple_delimiter}"Push Notifications"{tuple_delimiter}"The Mobile Development Team will implement Push Notifications as part of the app redesign."{tuple_delimiter}"feature development, technical implementation"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Q3 Strategic Planning Meeting"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"The Mobile Redesign Decision was made during the Q3 Strategic Planning Meeting."{tuple_delimiter}"decision making, strategic discussion"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"Mobile Redesign Timeline"{tuple_delimiter}"The Mobile Redesign Decision will be implemented according to the Mobile Redesign Timeline."{tuple_delimiter}"project planning, implementation schedule"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Mobile User Satisfaction Index"{tuple_delimiter}"Mobile Redesign Decision"{tuple_delimiter}"The Mobile User Satisfaction Index will be used to measure the success of the Mobile Redesign Decision, with a target of 40% improvement."{tuple_delimiter}"performance measurement, success criteria"{tuple_delimiter}8){record_delimiter}
+("content_keywords"{tuple_delimiter}"mobile development, strategic planning, customer research, market trends, app redesign, enterprise collaboration, user engagement, product strategy"){completion_delimiter}
 #############################""",
     """Example 3:
 
-Entity_types: [economic_policy, athlete, event, location, record, organization, equipment]
+Entity_types: [organisation, team, team member, customer, product, feature, insight, decision, document, event, metric, timeline]
 Text:
 ```
-At the World Athletics Championship in Tokyo, Noah Carter broke the 100m sprint record using cutting-edge carbon-fiber spikes.
+During yesterday's User Feedback Session, NovaTech's Product Team gathered input from beta users of their SmartTask project management application. Lead Designer Emma Rodriguez demonstrated the new Task Dependencies Feature, which allows users to create visual workflows between related tasks.
+
+FutureWorks Inc., a midsize marketing agency and pilot customer, provided valuable feedback through their Project Director, David Chen. "The dependency visualization is powerful, but we need the ability to set conditional dependencies based on task status," Chen explained.
+
+This insight resonated with findings from the recent Customer Needs Assessment, which identified advanced dependency management as a top request among enterprise users. After the session, Product Owner Jason Kim and the Development Team conducted a quick analysis and determined that implementing conditional dependencies would require approximately three weeks of development time.
+
+In the Post-Session Debrief, the team decided to add this enhancement to the Q2 Development Roadmap, targeting inclusion in the 3.5 release. This decision was recorded in the Product Requirements Document, along with specific user stories and acceptance criteria.
+
+Success will be measured using the Feature Adoption Rate and the Task Management Efficiency Score, with a baseline to be established immediately after release.
 ```
 
 Output:
-("entity"{tuple_delimiter}"World Athletics Championship"{tuple_delimiter}"event"{tuple_delimiter}"The World Athletics Championship is a global sports competition featuring top athletes in track and field."){record_delimiter}
-("entity"{tuple_delimiter}"Tokyo"{tuple_delimiter}"location"{tuple_delimiter}"Tokyo is the host city of the World Athletics Championship."){record_delimiter}
-("entity"{tuple_delimiter}"Noah Carter"{tuple_delimiter}"athlete"{tuple_delimiter}"Noah Carter is a sprinter who set a new record in the 100m sprint at the World Athletics Championship."){record_delimiter}
-("entity"{tuple_delimiter}"100m Sprint Record"{tuple_delimiter}"record"{tuple_delimiter}"The 100m sprint record is a benchmark in athletics, recently broken by Noah Carter."){record_delimiter}
-("entity"{tuple_delimiter}"Carbon-Fiber Spikes"{tuple_delimiter}"equipment"{tuple_delimiter}"Carbon-fiber spikes are advanced sprinting shoes that provide enhanced speed and traction."){record_delimiter}
-("entity"{tuple_delimiter}"World Athletics Federation"{tuple_delimiter}"organization"{tuple_delimiter}"The World Athletics Federation is the governing body overseeing the World Athletics Championship and record validations."){record_delimiter}
-("relationship"{tuple_delimiter}"World Athletics Championship"{tuple_delimiter}"Tokyo"{tuple_delimiter}"The World Athletics Championship is being hosted in Tokyo."{tuple_delimiter}"event location, international competition"{tuple_delimiter}8){record_delimiter}
-("relationship"{tuple_delimiter}"Noah Carter"{tuple_delimiter}"100m Sprint Record"{tuple_delimiter}"Noah Carter set a new 100m sprint record at the championship."{tuple_delimiter}"athlete achievement, record-breaking"{tuple_delimiter}10){record_delimiter}
-("relationship"{tuple_delimiter}"Noah Carter"{tuple_delimiter}"Carbon-Fiber Spikes"{tuple_delimiter}"Noah Carter used carbon-fiber spikes to enhance performance during the race."{tuple_delimiter}"athletic equipment, performance boost"{tuple_delimiter}7){record_delimiter}
-("relationship"{tuple_delimiter}"World Athletics Federation"{tuple_delimiter}"100m Sprint Record"{tuple_delimiter}"The World Athletics Federation is responsible for validating and recognizing new sprint records."{tuple_delimiter}"sports regulation, record certification"{tuple_delimiter}9){record_delimiter}
-("content_keywords"{tuple_delimiter}"athletics, sprinting, record-breaking, sports technology, competition"){completion_delimiter}
-#############################""",
+("entity"{tuple_delimiter}"NovaTech"{tuple_delimiter}"organisation"{tuple_delimiter}"The company that develops the SmartTask project management application and conducted the User Feedback Session."){record_delimiter}
+("entity"{tuple_delimiter}"Product Team"{tuple_delimiter}"team"{tuple_delimiter}"NovaTech's team responsible for gathering user feedback and making product decisions for SmartTask."){record_delimiter}
+("entity"{tuple_delimiter}"Development Team"{tuple_delimiter}"team"{tuple_delimiter}"NovaTech's team responsible for implementing features and enhancements to SmartTask."){record_delimiter}
+("entity"{tuple_delimiter}"Emma Rodriguez"{tuple_delimiter}"team member"{tuple_delimiter}"The Lead Designer at NovaTech who demonstrated the new Task Dependencies Feature during the User Feedback Session."){record_delimiter}
+("entity"{tuple_delimiter}"Jason Kim"{tuple_delimiter}"team member"{tuple_delimiter}"The Product Owner at NovaTech who, along with the Development Team, analyzed the feasibility of implementing conditional dependencies."){record_delimiter}
+("entity"{tuple_delimiter}"David Chen"{tuple_delimiter}"team member"{tuple_delimiter}"The Project Director at FutureWorks Inc. who provided feedback about needing conditional dependencies based on task status."){record_delimiter}
+("entity"{tuple_delimiter}"FutureWorks Inc."{tuple_delimiter}"customer"{tuple_delimiter}"A midsize marketing agency and pilot customer of NovaTech's SmartTask application."){record_delimiter}
+("entity"{tuple_delimiter}"SmartTask"{tuple_delimiter}"product"{tuple_delimiter}"A project management application developed by NovaTech that includes features like task dependencies."){record_delimiter}
+("entity"{tuple_delimiter}"Task Dependencies Feature"{tuple_delimiter}"feature"{tuple_delimiter}"A feature in SmartTask that allows users to create visual workflows between related tasks."){record_delimiter}
+("entity"{tuple_delimiter}"Conditional Dependencies"{tuple_delimiter}"feature"{tuple_delimiter}"A requested enhancement to the Task Dependencies Feature that would allow dependencies based on task status."){record_delimiter}
+("entity"{tuple_delimiter}"Dependency Enhancement Need"{tuple_delimiter}"insight"{tuple_delimiter}"The insight that users need the ability to set conditional dependencies based on task status, which aligns with findings from the Customer Needs Assessment."){record_delimiter}
+("entity"{tuple_delimiter}"Enterprise User Preference"{tuple_delimiter}"insight"{tuple_delimiter}"The finding from the Customer Needs Assessment that advanced dependency management is a top request among enterprise users."){record_delimiter}
+("entity"{tuple_delimiter}"Feature Implementation Decision"{tuple_delimiter}"decision"{tuple_delimiter}"The decision to add conditional dependencies enhancement to the Q2 Development Roadmap, targeting inclusion in the 3.5 release."){record_delimiter}
+("entity"{tuple_delimiter}"Product Requirements Document"{tuple_delimiter}"document"{tuple_delimiter}"A document where the decision to implement conditional dependencies was recorded, along with user stories and acceptance criteria."){record_delimiter}
+("entity"{tuple_delimiter}"Customer Needs Assessment"{tuple_delimiter}"document"{tuple_delimiter}"A research document that identified advanced dependency management as a top request among enterprise users."){record_delimiter}
+("entity"{tuple_delimiter}"User Feedback Session"{tuple_delimiter}"event"{tuple_delimiter}"An event where NovaTech's Product Team gathered input from beta users of SmartTask, including demonstration of the Task Dependencies Feature."){record_delimiter}
+("entity"{tuple_delimiter}"Post-Session Debrief"{tuple_delimiter}"event"{tuple_delimiter}"A meeting after the User Feedback Session where the team decided to add conditional dependencies to the roadmap."){record_delimiter}
+("entity"{tuple_delimiter}"Feature Adoption Rate"{tuple_delimiter}"metric"{tuple_delimiter}"A metric that will be used to measure the success of the conditional dependencies feature after release."){record_delimiter}
+("entity"{tuple_delimiter}"Task Management Efficiency Score"{tuple_delimiter}"metric"{tuple_delimiter}"A metric that will be used to measure the success of the conditional dependencies feature after release."){record_delimiter}
+("entity"{tuple_delimiter}"Q2 Development Roadmap"{tuple_delimiter}"timeline"{tuple_delimiter}"The schedule for upcoming development work, which now includes the conditional dependencies enhancement."){record_delimiter}
+("entity"{tuple_delimiter}"Three-Week Development Estimate"{tuple_delimiter}"timeline"{tuple_delimiter}"The estimated time required to implement the conditional dependencies feature."){record_delimiter}
+("relationship"{tuple_delimiter}"NovaTech"{tuple_delimiter}"SmartTask"{tuple_delimiter}"NovaTech develops the SmartTask project management application."{tuple_delimiter}"product development, ownership"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"NovaTech"{tuple_delimiter}"Product Team"{tuple_delimiter}"The Product Team is part of NovaTech and responsible for the SmartTask product."{tuple_delimiter}"organizational structure, team responsibility"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Emma Rodriguez"{tuple_delimiter}"Product Team"{tuple_delimiter}"Emma Rodriguez is the Lead Designer in NovaTech's Product Team."{tuple_delimiter}"team membership, design leadership"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Jason Kim"{tuple_delimiter}"Product Team"{tuple_delimiter}"Jason Kim is the Product Owner in NovaTech's Product Team."{tuple_delimiter}"team membership, product ownership"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"FutureWorks Inc."{tuple_delimiter}"SmartTask"{tuple_delimiter}"FutureWorks Inc. is a pilot customer using NovaTech's SmartTask application."{tuple_delimiter}"customer relationship, product usage"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"David Chen"{tuple_delimiter}"FutureWorks Inc."{tuple_delimiter}"David Chen is the Project Director at FutureWorks Inc."{tuple_delimiter}"employment, leadership role"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"SmartTask"{tuple_delimiter}"Task Dependencies Feature"{tuple_delimiter}"The Task Dependencies Feature is a component of the SmartTask application."{tuple_delimiter}"product feature, functionality"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Task Dependencies Feature"{tuple_delimiter}"Conditional Dependencies"{tuple_delimiter}"Conditional Dependencies is a requested enhancement to the existing Task Dependencies Feature."{tuple_delimiter}"feature enhancement, functionality extension"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"FutureWorks Inc."{tuple_delimiter}"Dependency Enhancement Need"{tuple_delimiter}"FutureWorks Inc., through David Chen, expressed the need for conditional dependencies based on task status."{tuple_delimiter}"customer feedback, feature request"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Dependency Enhancement Need"{tuple_delimiter}"Enterprise User Preference"{tuple_delimiter}"The need for conditional dependencies aligns with the finding that advanced dependency management is a top request among enterprise users."{tuple_delimiter}"insight validation, user preference"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Dependency Enhancement Need"{tuple_delimiter}"Feature Implementation Decision"{tuple_delimiter}"The identified need for conditional dependencies led to the decision to implement this enhancement."{tuple_delimiter}"requirement gathering, feature planning"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Feature Implementation Decision"{tuple_delimiter}"Product Requirements Document"{tuple_delimiter}"The decision to implement conditional dependencies was recorded in the Product Requirements Document."{tuple_delimiter}"decision documentation, requirements specification"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Feature Implementation Decision"{tuple_delimiter}"Q2 Development Roadmap"{tuple_delimiter}"The decision to implement conditional dependencies resulted in adding this enhancement to the Q2 Development Roadmap."{tuple_delimiter}"roadmap planning, feature scheduling"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"User Feedback Session"{tuple_delimiter}"Dependency Enhancement Need"{tuple_delimiter}"The Dependency Enhancement Need was identified during the User Feedback Session."{tuple_delimiter}"feedback gathering, need identification"{tuple_delimiter}9){record_delimiter}
+("relationship"{tuple_delimiter}"Post-Session Debrief"{tuple_delimiter}"Feature Implementation Decision"{tuple_delimiter}"The Feature Implementation Decision was made during the Post-Session Debrief."{tuple_delimiter}"decision making, planning"{tuple_delimiter}10){record_delimiter}
+("relationship"{tuple_delimiter}"Development Team"{tuple_delimiter}"Three-Week Development Estimate"{tuple_delimiter}"The Development Team determined that implementing conditional dependencies would require the Three-Week Development Estimate."{tuple_delimiter}"estimation, development planning"{tuple_delimiter}8){record_delimiter}
+("relationship"{tuple_delimiter}"Feature Adoption Rate"{tuple_delimiter}"Conditional Dependencies"{tuple_delimiter}"The Feature Adoption Rate will be used to measure how widely the Conditional Dependencies feature is used after release."{tuple_delimiter}"success measurement, usage tracking"{tuple_delimiter}7){record_delimiter}
+("content_keywords"{tuple_delimiter}"user feedback, project management, feature enhancement, product development, task dependencies, customer needs, roadmap planning, agile development"){completion_delimiter}
+#############################"""
 ]
 
 PROMPTS[

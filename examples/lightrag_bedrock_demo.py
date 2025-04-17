@@ -28,7 +28,7 @@ async def initialize_rag():
         llm_model_func=bedrock_complete,
         llm_model_name="Anthropic Claude 3 Haiku // Amazon Bedrock",
         embedding_func=EmbeddingFunc(
-            embedding_dim=1024, max_token_size=8192, func=bedrock_embed
+            embedding_dim=1536, max_token_size=8192, func=bedrock_embed
         ),
     )
 

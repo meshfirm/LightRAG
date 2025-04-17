@@ -58,7 +58,7 @@ async def initialize_rag():
         working_dir=WORKING_DIR,
         llm_model_func=llm_model_func,
         embedding_func=EmbeddingFunc(
-            embedding_dim=1024, max_token_size=512, func=embedding_func
+            embedding_dim=1536, max_token_size=512, func=embedding_func
         ),
     )
 

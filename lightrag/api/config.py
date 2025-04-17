@@ -15,7 +15,7 @@ load_dotenv(dotenv_path=".env", override=False)
 
 class OllamaServerInfos:
     # Constants for emulated Ollama model information
-    LIGHTRAG_NAME = "lightrag"
+    LIGHTRAG_NAME = "sindre"
     LIGHTRAG_TAG = os.getenv("OLLAMA_EMULATING_MODEL_TAG", "latest")
     LIGHTRAG_MODEL = f"{LIGHTRAG_NAME}:{LIGHTRAG_TAG}"
     LIGHTRAG_SIZE = 7365960935  # it's a dummy value
@@ -41,8 +41,8 @@ def get_default_host(binding_type: str) -> str:
         "openai": os.getenv("LLM_BINDING_HOST", "https://api.openai.com/v1"),
     }
     return default_hosts.get(
-        binding_type, os.getenv("LLM_BINDING_HOST", "http://localhost:11434")
-    )  # fallback to ollama if unknown
+        binding_type, os.getenv("LLM_BINDING_HOST", "https://api.openai.com/v1")
+    )  # fallback to openai if unknown
 
 
 def get_env_value(env_key: str, default: any, value_type: type = str) -> any:
@@ -234,16 +234,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--llm-binding",
         type=str,
-        default=get_env_value("LLM_BINDING", "ollama"),
+        default=get_env_value("LLM_BINDING", "openai"),
         choices=["lollms", "ollama", "openai", "openai-ollama", "azure_openai"],
         help="LLM binding type (default: from env or ollama)",
     )
     parser.add_argument(
         "--embedding-binding",
         type=str,
-        default=get_env_value("EMBEDDING_BINDING", "ollama"),
+        default=get_env_value("EMBEDDING_BINDING", "openai"),
         choices=["lollms", "ollama", "openai", "azure_openai"],
-        help="Embedding binding type (default: from env or ollama)",
+        help="Embedding binding type (default: from env or openai)",
     )
 
     args = parser.parse_args()
@@ -284,9 +284,9 @@ def parse_args() -> argparse.Namespace:
     args.embedding_binding_api_key = get_env_value("EMBEDDING_BINDING_API_KEY", "")
 
     # Inject model configuration
-    args.llm_model = get_env_value("LLM_MODEL", "mistral-nemo:latest")
-    args.embedding_model = get_env_value("EMBEDDING_MODEL", "bge-m3:latest")
-    args.embedding_dim = get_env_value("EMBEDDING_DIM", 1024, int)
+    args.llm_model = get_env_value("LLM_MODEL", "gpt-4o")
+    args.embedding_model = get_env_value("EMBEDDING_MODEL", "text-embeddings-3-small")
+    args.embedding_dim = get_env_value("EMBEDDING_DIM", 1536, int)
     args.max_embed_tokens = get_env_value("MAX_EMBED_TOKENS", 8192, int)
 
     # Inject chunk configuration
@@ -300,7 +300,7 @@ def parse_args() -> argparse.Namespace:
     args.enable_llm_cache = get_env_value("ENABLE_LLM_CACHE", True, bool)
 
     # Inject LLM temperature configuration
-    args.temperature = get_env_value("TEMPERATURE", 0.5, float)
+    args.temperature = get_env_value("TEMPERATURE", 0.2, float)
 
     # Select Document loading tool (DOCLING, DEFAULT)
     args.document_loading_engine = get_env_value("DOCUMENT_LOADING_ENGINE", "DEFAULT")
