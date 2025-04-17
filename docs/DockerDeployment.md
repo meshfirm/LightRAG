@@ -118,7 +118,7 @@ LLM_BINDING=openai
 LLM_MODEL=gpt-4o
 EMBEDDING_BINDING=openai
 EMBEDDING_MODEL=text-embedding-3-small
-OPENAI_API_KEY=sk-proj-lzztDfKbdjS2k8kO8ezxT3BlbkFJ0BnE3K2b1zlY7U7wPv0N
+OPENAI_API_KEY=your-api-key
 ```
 
 ### API Usage
