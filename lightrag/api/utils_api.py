@@ -81,6 +81,11 @@ def get_combined_auth_dependency(api_key: Optional[str] = None):
         api_key_header = APIKeyHeader(
             name="X-API-Key", auto_error=False, description="API Key Authentication"
         )
+    
+    # Create header for user ID
+    user_id_header = APIKeyHeader(
+        name="X-User-ID", auto_error=False, description="User ID for multi-user support"
+    )
 
     async def combined_dependency(
         request: Request,
@@ -88,6 +93,7 @@ def get_combined_auth_dependency(api_key: Optional[str] = None):
         api_key_header_value: Optional[str] = None
         if api_key_header is None
         else Security(api_key_header),
+        user_id: Optional[str] = Security(user_id_header),
     ):
         # 1. Check if path is in whitelist
         path = request.url.path
@@ -161,6 +167,52 @@ def get_combined_auth_dependency(api_key: Optional[str] = None):
         )
 
     return combined_dependency
+
+
+def extract_user_id(request: Request) -> str:
+    """
+    Extract and validate the user ID from the request.
+    
+    Args:
+        request: The FastAPI Request object
+        
+    Returns:
+        str: The validated user ID
+        
+    Raises:
+        HTTPException: If user ID is missing or invalid
+    """
+    # Try to get user ID from header
+    user_id = request.headers.get("X-User-ID")
+    
+    # If not in header, try to get from token payload
+    if not user_id and "authorization" in request.headers:
+        try:
+            token = request.headers["authorization"].split(" ")[1]
+            token_info = auth_handler.validate_token(token)
+            user_id = token_info.get("sub") or token_info.get("user_id")
+        except (IndexError, ValueError, HTTPException):
+            pass
+    
+    # If still no user_id, check query parameters
+    if not user_id:
+        user_id = request.query_params.get("user_id")
+    
+    # Validate user ID
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User ID is required. Please provide it via X-User-ID header, token, or user_id query parameter.",
+        )
+    
+    # Simple validation - ensure user_id is alphanumeric and reasonable length
+    if not user_id.isalnum() or len(user_id) > 64:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid User ID format. Must be alphanumeric and under 64 characters.",
+        )
+    
+    return user_id
 
 
 def display_splash_screen(args: argparse.Namespace) -> None:

@@ -11,13 +11,16 @@ import pipmaster as pm
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Literal
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, Request
 from pydantic import BaseModel, Field, field_validator
 
 from lightrag import LightRAG
 from lightrag.base import DocProcessingStatus, DocStatus
 from lightrag.api.utils_api import get_combined_auth_dependency
 from ..config import global_args
+
+from ..utils_api import extract_user_id
+from ..user_rag_manager import get_manager
 
 router = APIRouter(
     prefix="/documents",
@@ -706,11 +709,15 @@ def create_document_routes(
 ):
     # Create combined auth dependency for document routes
     combined_auth = get_combined_auth_dependency(api_key)
+    
+    # Import the RAG manager
+    from lightrag.api.user_rag_manager import get_manager
+    from lightrag.api.utils_api import extract_user_id
 
     @router.post(
         "/scan", response_model=ScanResponse, dependencies=[Depends(combined_auth)]
     )
-    async def scan_for_new_documents(background_tasks: BackgroundTasks):
+    async def scan_for_new_documents(background_tasks: BackgroundTasks, request: Request):
         """
         Trigger the scanning process for new documents.
 
@@ -721,18 +728,39 @@ def create_document_routes(
         Returns:
             ScanResponse: A response object containing the scanning status
         """
-        # Start the scanning process in the background
-        background_tasks.add_task(run_scanning_process, rag, doc_manager)
-        return ScanResponse(
-            status="scanning_started",
-            message="Scanning process has been initiated in the background",
-        )
+        try:
+            # Try to get user ID for user-specific scanning
+            user_id = extract_user_id(request)
+            user_rag = await get_manager().get_instance(user_id)
+            
+            # Start the scanning process in the background for the user's RAG instance
+            background_tasks.add_task(run_scanning_process, user_rag, doc_manager)
+            logger.info(f"Started scanning process for user: {user_id}")
+            
+            return ScanResponse(
+                status="scanning_started",
+                message=f"Scanning process for user {user_id} has been initiated in the background",
+            )
+        except HTTPException as e:
+            if e.status_code == 400:  # User ID validation error
+                # Fall back to system-wide scan if no valid user ID
+                logger.warning("No valid user ID provided, using system RAG instance")
+                background_tasks.add_task(run_scanning_process, rag, doc_manager)
+                
+                return ScanResponse(
+                    status="scanning_started",
+                    message="System-wide scanning process has been initiated in the background",
+                )
+            else:
+                raise
 
     @router.post(
         "/upload", response_model=InsertResponse, dependencies=[Depends(combined_auth)]
     )
     async def upload_to_input_dir(
-        background_tasks: BackgroundTasks, file: UploadFile = File(...)
+        request: Request,
+        background_tasks: BackgroundTasks,
+        file: UploadFile = File(...)
     ):
         """
         Upload a file to the input directory and index it.
@@ -742,6 +770,7 @@ def create_document_routes(
         indexes it for retrieval, and returns a success status with relevant details.
 
         Args:
+            request: The FastAPI request object
             background_tasks: FastAPI BackgroundTasks for async processing
             file (UploadFile): The file to be uploaded. It must have an allowed extension.
 
@@ -753,13 +782,33 @@ def create_document_routes(
             HTTPException: If the file type is not supported (400) or other errors occur (500).
         """
         try:
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Using RAG instance for user: {user_id}")
+            
             if not doc_manager.is_supported_file(file.filename):
                 raise HTTPException(
                     status_code=400,
                     detail=f"Unsupported file type. Supported types: {doc_manager.supported_extensions}",
                 )
 
-            file_path = doc_manager.input_dir / file.filename
+            # Create user-specific directory if user ID is provided
+            if user_id:
+                user_dir = doc_manager.input_dir / f"user_{user_id}"
+                user_dir.mkdir(exist_ok=True)
+                file_path = user_dir / file.filename
+            else:
+                file_path = doc_manager.input_dir / file.filename
+                
             # Check if file already exists
             if file_path.exists():
                 return InsertResponse(
@@ -771,11 +820,11 @@ def create_document_routes(
                 shutil.copyfileobj(file.file, buffer)
 
             # Add to background tasks
-            background_tasks.add_task(pipeline_index_file, rag, file_path)
+            background_tasks.add_task(pipeline_index_file, user_rag, file_path)
 
             return InsertResponse(
                 status="success",
-                message=f"File '{file.filename}' uploaded successfully. Processing will continue in background.",
+                message=f"File '{file.filename}' uploaded successfully for {'user ' + user_id if user_id else 'system'}. Processing will continue in background.",
             )
         except Exception as e:
             logger.error(f"Error /documents/upload: {file.filename}: {str(e)}")
@@ -786,7 +835,9 @@ def create_document_routes(
         "/text", response_model=InsertResponse, dependencies=[Depends(combined_auth)]
     )
     async def insert_text(
-        request: InsertTextRequest, background_tasks: BackgroundTasks
+        request: Request,
+        insert_request: InsertTextRequest, 
+        background_tasks: BackgroundTasks
     ):
         """
         Insert text into the RAG system.
@@ -795,7 +846,8 @@ def create_document_routes(
         and use in generating responses.
 
         Args:
-            request (InsertTextRequest): The request body containing the text to be inserted.
+            request: The FastAPI request object
+            insert_request (InsertTextRequest): The request body containing the text to be inserted.
             background_tasks: FastAPI BackgroundTasks for async processing
 
         Returns:
@@ -805,10 +857,23 @@ def create_document_routes(
             HTTPException: If an error occurs during text processing (500).
         """
         try:
-            background_tasks.add_task(pipeline_index_texts, rag, [request.text])
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Using RAG instance for user: {user_id}")
+            
+            background_tasks.add_task(pipeline_index_texts, user_rag, [insert_request.text])
             return InsertResponse(
                 status="success",
-                message="Text successfully received. Processing will continue in background.",
+                message=f"Text successfully received for {'user ' + user_id if user_id else 'system'}. Processing will continue in background.",
             )
         except Exception as e:
             logger.error(f"Error /documents/text: {str(e)}")
@@ -821,7 +886,9 @@ def create_document_routes(
         dependencies=[Depends(combined_auth)],
     )
     async def insert_texts(
-        request: InsertTextsRequest, background_tasks: BackgroundTasks
+        request: Request,
+        insert_request: InsertTextsRequest, 
+        background_tasks: BackgroundTasks
     ):
         """
         Insert multiple texts into the RAG system.
@@ -830,7 +897,8 @@ def create_document_routes(
         in a single request.
 
         Args:
-            request (InsertTextsRequest): The request body containing the list of texts.
+            request: The FastAPI request object
+            insert_request (InsertTextsRequest): The request body containing the list of texts.
             background_tasks: FastAPI BackgroundTasks for async processing
 
         Returns:
@@ -840,13 +908,26 @@ def create_document_routes(
             HTTPException: If an error occurs during text processing (500).
         """
         try:
-            background_tasks.add_task(pipeline_index_texts, rag, request.texts)
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Using RAG instance for user: {user_id}")
+            
+            background_tasks.add_task(pipeline_index_texts, user_rag, insert_request.texts)
             return InsertResponse(
                 status="success",
-                message="Text successfully received. Processing will continue in background.",
+                message=f"Text successfully received for {'user ' + user_id if user_id else 'system'}. Processing will continue in background.",
             )
         except Exception as e:
-            logger.error(f"Error /documents/text: {str(e)}")
+            logger.error(f"Error /documents/texts: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
 
@@ -1214,12 +1295,15 @@ def create_document_routes(
     @router.get(
         "", response_model=DocsStatusesResponse, dependencies=[Depends(combined_auth)]
     )
-    async def documents() -> DocsStatusesResponse:
+    async def documents(request: Request) -> DocsStatusesResponse:
         """
         Get the status of all documents in the system.
 
         This endpoint retrieves the current status of all documents, grouped by their
         processing status (PENDING, PROCESSING, PROCESSED, FAILED).
+
+        Args:
+            request: The FastAPI request object
 
         Returns:
             DocsStatusesResponse: A response object containing a dictionary where keys are
@@ -1230,6 +1314,19 @@ def create_document_routes(
             HTTPException: If an error occurs while retrieving document statuses (500).
         """
         try:
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Getting document statuses for user: {user_id}")
+            
             statuses = (
                 DocStatus.PENDING,
                 DocStatus.PROCESSING,
@@ -1237,7 +1334,7 @@ def create_document_routes(
                 DocStatus.FAILED,
             )
 
-            tasks = [rag.get_docs_by_status(status) for status in statuses]
+            tasks = [user_rag.get_docs_by_status(status) for status in statuses]
             results: List[Dict[str, DocProcessingStatus]] = await asyncio.gather(*tasks)
 
             response = DocsStatusesResponse()
@@ -1323,5 +1420,5 @@ def create_document_routes(
             logger.error(f"Error clearing cache: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
-
+    
     return router

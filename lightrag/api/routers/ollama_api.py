@@ -10,8 +10,9 @@ from fastapi.responses import StreamingResponse
 import asyncio
 from ascii_colors import trace_exception
 from lightrag import LightRAG, QueryParam
-from lightrag.utils import encode_string_by_tiktoken
-from lightrag.api.utils_api import ollama_server_infos, get_combined_auth_dependency
+from lightrag.utils import encode_string_by_tiktoken, logger
+from lightrag.api.utils_api import ollama_server_infos, get_combined_auth_dependency, extract_user_id
+from lightrag.api.user_rag_manager import get_manager
 from fastapi import Depends
 
 
@@ -183,16 +184,29 @@ class OllamaAPI:
             and will be handled by underlying LLM model.
             """
             try:
+                # Get user ID
+                user_id = None
+                try:
+                    user_id = extract_user_id(raw_request)
+                except HTTPException:
+                    logger.warning("No valid user ID provided, using system-wide storage")
+                
+                # Get user-specific RAG instance if user_id is available
+                user_rag = self.rag
+                if user_id:
+                    user_rag = await get_manager().get_instance(user_id)
+                    logger.info(f"Processing generate request for user: {user_id}")
+                
                 query = request.prompt
                 start_time = time.time_ns()
                 prompt_tokens = estimate_tokens(query)
 
                 if request.system:
-                    self.rag.llm_model_kwargs["system_prompt"] = request.system
+                    user_rag.llm_model_kwargs["system_prompt"] = request.system
 
                 if request.stream:
-                    response = await self.rag.llm_model_func(
-                        query, stream=True, **self.rag.llm_model_kwargs
+                    response = await user_rag.llm_model_func(
+                        query, stream=True, **user_rag.llm_model_kwargs
                     )
 
                     async def stream_generator():
@@ -313,8 +327,8 @@ class OllamaAPI:
                     )
                 else:
                     first_chunk_time = time.time_ns()
-                    response_text = await self.rag.llm_model_func(
-                        query, stream=False, **self.rag.llm_model_kwargs
+                    response_text = await user_rag.llm_model_func(
+                        query, stream=False, **user_rag.llm_model_kwargs
                     )
                     last_chunk_time = time.time_ns()
 
@@ -349,6 +363,19 @@ class OllamaAPI:
             Detects and forwards OpenWebUI session-related requests (for meta data generation task) directly to LLM.
             """
             try:
+                # Get user ID
+                user_id = None
+                try:
+                    user_id = extract_user_id(raw_request)
+                except HTTPException:
+                    logger.warning("No valid user ID provided, using system-wide storage")
+                
+                # Get user-specific RAG instance if user_id is available
+                user_rag = self.rag
+                if user_id:
+                    user_rag = await get_manager().get_instance(user_id)
+                    logger.info(f"Processing chat request for user: {user_id}")
+                
                 # Get all messages
                 messages = request.messages
                 if not messages:
@@ -376,10 +403,10 @@ class OllamaAPI:
                 }
 
                 if (
-                    hasattr(self.rag, "args")
-                    and self.rag.args.history_turns is not None
+                    hasattr(user_rag, "args")
+                    and user_rag.args.history_turns is not None
                 ):
-                    param_dict["history_turns"] = self.rag.args.history_turns
+                    param_dict["history_turns"] = user_rag.args.history_turns
 
                 query_param = QueryParam(**param_dict)
 
@@ -387,15 +414,15 @@ class OllamaAPI:
                     # Determine if the request is prefix with "/bypass"
                     if mode == SearchMode.bypass:
                         if request.system:
-                            self.rag.llm_model_kwargs["system_prompt"] = request.system
-                        response = await self.rag.llm_model_func(
+                            user_rag.llm_model_kwargs["system_prompt"] = request.system
+                        response = await user_rag.llm_model_func(
                             cleaned_query,
                             stream=True,
                             history_messages=conversation_history,
-                            **self.rag.llm_model_kwargs,
+                            **user_rag.llm_model_kwargs,
                         )
                     else:
-                        response = await self.rag.aquery(
+                        response = await user_rag.aquery(
                             cleaned_query, param=query_param
                         )
 
@@ -524,7 +551,7 @@ class OllamaAPI:
                             "Cache-Control": "no-cache",
                             "Connection": "keep-alive",
                             "Content-Type": "application/x-ndjson",
-                            "X-Accel-Buffering": "no",  # 确保在Nginx代理时正确处理流式响应
+                            "X-Accel-Buffering": "no",  # Ensure proper handling in Nginx proxy
                         },
                     )
                 else:
@@ -536,16 +563,16 @@ class OllamaAPI:
                     )
                     if match_result or mode == SearchMode.bypass:
                         if request.system:
-                            self.rag.llm_model_kwargs["system_prompt"] = request.system
+                            user_rag.llm_model_kwargs["system_prompt"] = request.system
 
-                        response_text = await self.rag.llm_model_func(
+                        response_text = await user_rag.llm_model_func(
                             cleaned_query,
                             stream=False,
                             history_messages=conversation_history,
-                            **self.rag.llm_model_kwargs,
+                            **user_rag.llm_model_kwargs,
                         )
                     else:
-                        response_text = await self.rag.aquery(
+                        response_text = await user_rag.aquery(
                             cleaned_query, param=query_param
                         )
 

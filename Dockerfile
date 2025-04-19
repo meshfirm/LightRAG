@@ -29,8 +29,6 @@ WORKDIR /app
 # Copy only necessary files from builder
 COPY --from=builder /root/.local /root/.local
 COPY ./lightrag ./lightrag
-COPY ./lightrag_multitenant ./lightrag_multitenant
-COPY ./app ./app
 COPY setup.py .
 
 RUN pip install .
@@ -48,4 +46,4 @@ ENV INPUT_DIR=/app/data/inputs
 EXPOSE 9621
 
 # Set entrypoint
-ENTRYPOINT ["python", "app.py"]
+ENTRYPOINT ["python", "-m", "lightrag.api.lightrag_server"]
