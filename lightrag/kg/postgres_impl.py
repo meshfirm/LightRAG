@@ -74,6 +74,19 @@ class PostgreSQLDB:
                 f"PostgreSQL, Failed to connect database at {self.host}:{self.port}/{self.database}, Got:{e}"
             )
             raise
+    
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if user_id:
+            self.workspace = f"user_{user_id}"
+        else:
+            # Reset to the default workspace from config
+            config = ClientManager.get_config()
+            self.workspace = config.get("workspace", "default")
 
     @staticmethod
     async def configure_age(connection: asyncpg.Connection, graph_name: str) -> None:
@@ -262,6 +275,20 @@ class ClientManager:
                         cls._instances["db"] = None
                 else:
                     await db.pool.close()
+        
+    @classmethod
+    async def get_client_for_user(cls, user_id: str | None = None) -> PostgreSQLDB:
+        """Get a client with the workspace set for a specific user.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+            
+        Returns:
+            PostgreSQLDB: The database client with the workspace set based on the user ID.
+        """
+        db = await cls.get_client()
+        db.set_user_workspace(user_id)
+        return db
 
 
 @final
@@ -280,6 +307,15 @@ class PGKVStorage(BaseKVStorage):
         if self.db is not None:
             await ClientManager.release_client(self.db)
             self.db = None
+
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     ################ QUERY METHODS ################
 
@@ -498,6 +534,15 @@ class PGVectorStorage(BaseVectorStorage):
         if self.db is not None:
             await ClientManager.release_client(self.db)
             self.db = None
+    
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     def _upsert_chunks(self, item: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         try:
@@ -808,6 +853,15 @@ class PGDocStatusStorage(DocStatusStorage):
         if self.db is not None:
             await ClientManager.release_client(self.db)
             self.db = None
+    
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     async def filter_keys(self, keys: set[str]) -> set[str]:
         """Filter out duplicated content"""
@@ -1035,6 +1089,15 @@ class PGGraphStorage(BaseGraphStorage):
     async def index_done_callback(self) -> None:
         # PG handles persistence automatically
         pass
+
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     @staticmethod
     def _record_to_dict(record: asyncpg.Record) -> dict[str, Any]:

@@ -89,6 +89,8 @@ class LightRAGManager:
             
             # Return existing instance if available
             if user_id in self.instances:
+                # Set workspace even for existing instances
+                self._set_user_workspace(self.instances[user_id], user_id)
                 return self.instances[user_id]
             
             # Create new instance with user_id as prefix
@@ -100,6 +102,9 @@ class LightRAGManager:
             # Set the namespace prefix for this user
             rag_instance.namespace_prefix = user_prefix
             
+            # Set the workspace for all storage classes
+            self._set_user_workspace(rag_instance, user_id)
+            
             # Initialize storages
             await rag_instance.initialize_storages()
             
@@ -109,6 +114,24 @@ class LightRAGManager:
             
             return rag_instance
     
+
+    def _set_user_workspace(self, rag_instance: LightRAG, user_id: str):
+        """Set the user workspace on all storage classes of a RAG instance.
+        
+        Args:
+            rag_instance: The RAG instance to set the workspace for.
+            user_id: The user ID to set the workspace for.
+        """
+        # Set user workspace on all storage classes
+        for storage_attr in [
+            'text_chunks', 'full_docs', 'entities_vdb', 
+            'relationships_vdb', 'chunks_vdb', 
+            'chunk_entity_relation_graph', 'doc_status'
+        ]:
+            storage = getattr(rag_instance, storage_attr, None)
+            if storage and hasattr(storage, 'set_user_workspace'):
+                storage.set_user_workspace(user_id)
+
     async def close(self):
         """Close all RAG instances."""
         # Cancel the cleanup task if it exists
