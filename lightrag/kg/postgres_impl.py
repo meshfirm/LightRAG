@@ -570,8 +570,6 @@ class PGVectorStorage(BaseVectorStorage):
             chunk_ids = source_id.split("<SEP>")
         else:
             chunk_ids = [source_id]
-        
-        logger.info(f"Item: {item}")
 
         data: dict[str, Any] = {
             "workspace": self.db.workspace,
