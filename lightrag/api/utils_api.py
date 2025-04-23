@@ -206,11 +206,11 @@ def extract_user_id(request: Request) -> str:
         )
     
     # Simple validation - ensure user_id is alphanumeric and reasonable length
-    if not user_id.isalnum() or len(user_id) > 64:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid User ID format. Must be alphanumeric and under 64 characters.",
-        )
+    # if not user_id.isalnum() or len(user_id) > 64:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail="Invalid User ID format. Must be alphanumeric and under 64 characters.",
+    #     )
     
     return user_id
 

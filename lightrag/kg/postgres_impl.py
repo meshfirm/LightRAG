@@ -570,11 +570,14 @@ class PGVectorStorage(BaseVectorStorage):
             chunk_ids = source_id.split("<SEP>")
         else:
             chunk_ids = [source_id]
+        
+        logger.info(f"Item: {item}")
 
         data: dict[str, Any] = {
             "workspace": self.db.workspace,
             "id": item["__id__"],
             "entity_name": item["entity_name"],
+            "entity_type": item["entity_type"],
             "content": item["content"],
             "content_vector": json.dumps(item["__vector__"].tolist()),
             "chunk_ids": chunk_ids,
@@ -1724,6 +1727,7 @@ TABLES = {
                     id VARCHAR(255),
                     workspace VARCHAR(255),
                     entity_name VARCHAR(255),
+                    entity_type TEXT,
                     content TEXT,
                     content_vector VECTOR,
                     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1830,11 +1834,12 @@ SQL_TEMPLATES = {
                       update_time = CURRENT_TIMESTAMP
                      """,
     # SQL for VectorStorage
-    "upsert_entity": """INSERT INTO LIGHTRAG_VDB_ENTITY (workspace, id, entity_name, content,
+    "upsert_entity": """INSERT INTO LIGHTRAG_VDB_ENTITY (workspace, id, entity_name, entity_type, content,
                       content_vector, chunk_ids, file_path)
-                      VALUES ($1, $2, $3, $4, $5, $6::varchar[], $7)
+                      VALUES ($1, $2, $3, $4, $5, $6, $7::varchar[], $8)
                       ON CONFLICT (workspace,id) DO UPDATE
                       SET entity_name=EXCLUDED.entity_name,
+                      entity_type=EXCLUDED.entity_type,
                       content=EXCLUDED.content,
                       content_vector=EXCLUDED.content_vector,
                       chunk_ids=EXCLUDED.chunk_ids,

@@ -1,0 +1,363 @@
+{
+    "settings": {
+      "language": "Sprog",
+      "theme": "Tema",
+      "light": "Lys",
+      "dark": "Mørk",
+      "system": "System"
+    },
+    "header": {
+      "documents": "Dokumenter",
+      "knowledgeGraph": "Vidensgraf",
+      "retrieval": "Genfinding",
+      "api": "API",
+      "projectRepository": "Projektarkiv",
+      "logout": "Log ud",
+      "themeToggle": {
+        "switchToLight": "Skift til lyst tema",
+        "switchToDark": "Skift til mørkt tema"
+      }
+    },
+    "login": {
+      "description": "Indtast venligst din konto og adgangskode for at logge ind på systemet",
+      "username": "Brugernavn",
+      "usernamePlaceholder": "Indtast venligst et brugernavn",
+      "password": "Adgangskode",
+      "passwordPlaceholder": "Indtast venligst en adgangskode",
+      "loginButton": "Log ind",
+      "loggingIn": "Logger ind...",
+      "successMessage": "Login lykkedes",
+      "errorEmptyFields": "Indtast venligst dit brugernavn og adgangskode",
+      "errorInvalidCredentials": "Login mislykkedes, kontroller venligst brugernavn og adgangskode",
+      "authDisabled": "Godkendelse er deaktiveret. Bruger login-fri tilstand.",
+      "guestMode": "Login-fri"
+    },
+    "common": {
+      "cancel": "Annuller",
+      "save": "Gem"
+    },
+    "documentPanel": {
+      "clearDocuments": {
+        "button": "Ryd",
+        "tooltip": "Ryd dokumenter",
+        "title": "Ryd Dokumenter",
+        "description": "Dette vil fjerne alle dokumenter fra systemet",
+        "warning": "ADVARSEL: Denne handling vil permanent slette alle dokumenter og kan ikke fortrydes!",
+        "confirm": "Vil du virkelig rydde alle dokumenter?",
+        "confirmPrompt": "Skriv 'ja' for at bekræfte denne handling",
+        "confirmPlaceholder": "Skriv ja for at bekræfte",
+        "clearCache": "Ryd LLM-cache",
+        "confirmButton": "JA",
+        "success": "Dokumenter ryddet med succes",
+        "cacheCleared": "Cache ryddet med succes",
+        "cacheClearFailed": "Kunne ikke rydde cache:\n{{error}}",
+        "failed": "Rydning af dokumenter mislykkedes:\n{{message}}",
+        "error": "Rydning af dokumenter mislykkedes:\n{{error}}"
+      },
+      "uploadDocuments": {
+        "button": "Upload",
+        "tooltip": "Upload dokumenter",
+        "title": "Upload Dokumenter",
+        "description": "Træk og slip dine dokumenter her eller klik for at gennemse.",
+        "single": {
+          "uploading": "Uploader {{name}}: {{percent}}%",
+          "success": "Upload Success:\n{{name}} uploadet med succes",
+          "failed": "Upload Mislykkedes:\n{{name}}\n{{message}}",
+          "error": "Upload Mislykkedes:\n{{name}}\n{{error}}"
+        },
+        "batch": {
+          "uploading": "Uploader filer...",
+          "success": "Filer uploadet med succes",
+          "error": "Nogle filer kunne ikke uploades"
+        },
+        "generalError": "Upload Mislykkedes\n{{error}}",
+        "fileTypes": "Understøttede typer: TXT, MD, DOCX, PDF, PPTX, RTF, ODT, EPUB, HTML, HTM, TEX, JSON, XML, YAML, YML, CSV, LOG, CONF, INI, PROPERTIES, SQL, BAT, SH, C, CPP, PY, JAVA, JS, TS, SWIFT, GO, RB, PHP, CSS, SCSS, LESS",
+        "fileUploader": {
+          "singleFileLimit": "Kan ikke uploade mere end 1 fil ad gangen",
+          "maxFilesLimit": "Kan ikke uploade mere end {{count}} filer",
+          "fileRejected": "Fil {{name}} blev afvist",
+          "unsupportedType": "Ikke-understøttet filtype",
+          "fileTooLarge": "Fil for stor, maksimal størrelse er {{maxSize}}",
+          "dropHere": "Slip filerne her",
+          "dragAndDrop": "Træk og slip filer her, eller klik for at vælge filer",
+          "removeFile": "Fjern fil",
+          "uploadDescription": "Du kan uploade {{isMultiple ? 'flere' : count}} filer (op til {{maxSize}} hver)",
+          "duplicateFile": "Filnavn eksisterer allerede i servercache"
+        }
+      },
+      "documentManager": {
+        "title": "Dokumenthåndtering",
+        "scanButton": "Scan",
+        "scanTooltip": "Scan dokumenter i inputmappe",
+        "pipelineStatusButton": "Pipeline Status",
+        "pipelineStatusTooltip": "Se pipeline status",
+        "uploadedTitle": "Uploadede Dokumenter",
+        "uploadedDescription": "Liste over uploadede dokumenter og deres status.",
+        "emptyTitle": "Ingen Dokumenter",
+        "emptyDescription": "Der er endnu ingen uploadede dokumenter.",
+        "columns": {
+          "id": "ID",
+          "summary": "Sammendrag",
+          "status": "Status",
+          "length": "Længde",
+          "chunks": "Dele",
+          "created": "Oprettet",
+          "updated": "Opdateret",
+          "metadata": "Metadata"
+        },
+        "status": {
+          "all": "Alle",
+          "completed": "Fuldført",
+          "processing": "Behandler",
+          "pending": "Afventer",
+          "failed": "Mislykkedes"
+        },
+        "errors": {
+          "loadFailed": "Kunne ikke indlæse dokumenter\n{{error}}",
+          "scanFailed": "Kunne ikke scanne dokumenter\n{{error}}",
+          "scanProgressFailed": "Kunne ikke hente scanningsfremskridt\n{{error}}"
+        },
+        "fileNameLabel": "Filnavn",
+        "showButton": "Vis",
+        "hideButton": "Skjul",
+        "showFileNameTooltip": "Vis filnavn",
+        "hideFileNameTooltip": "Skjul filnavn"
+      },
+      "pipelineStatus": {
+        "title": "Pipeline Status",
+        "busy": "Pipeline Optaget",
+        "requestPending": "Anmodning Afventer",
+        "jobName": "Jobnavn",
+        "startTime": "Starttid",
+        "progress": "Fremskridt",
+        "unit": "batch",
+        "latestMessage": "Seneste Besked",
+        "historyMessages": "Historiske Beskeder",
+        "errors": {
+          "fetchFailed": "Kunne ikke hente pipeline status\n{{error}}"
+        }
+      }
+    },
+    "graphPanel": {
+      "dataIsTruncated": "Grafdata er forkortet til Max Noder",
+      "statusDialog": {
+        "title": "LightRAG Server Indstillinger",
+        "description": "Se aktuel systemstatus og forbindelsesinformation"
+      },
+      "legend": "Forklaring",
+      "nodeTypes": {
+        "person": "Person",
+        "category": "Kategori",
+        "geo": "Geografisk",
+        "location": "Sted",
+        "organization": "Organisation",
+        "event": "Begivenhed",
+        "equipment": "Udstyr",
+        "weapon": "Våben",
+        "animal": "Dyr",
+        "unknown": "Ukendt",
+        "object": "Objekt",
+        "group": "Gruppe",
+        "technology": "Teknologi"
+      },
+      "sideBar": {
+        "settings": {
+          "settings": "Indstillinger",
+          "healthCheck": "Sundhedstjek",
+          "showPropertyPanel": "Vis Egenskabspanel",
+          "showSearchBar": "Vis Søgelinje",
+          "showNodeLabel": "Vis Nodeetiket",
+          "nodeDraggable": "Node Kan Trækkes",
+          "showEdgeLabel": "Vis Kantetiket",
+          "hideUnselectedEdges": "Skjul Uvalgte Kanter",
+          "edgeEvents": "Kantbegivenheder",
+          "maxQueryDepth": "Maks. Forespørgselsdybde",
+          "maxNodes": "Maks. Noder",
+          "maxLayoutIterations": "Maks. Layoutiterationer",
+          "resetToDefault": "Nulstil til standard",
+          "edgeSizeRange": "Kantstørrelsesområde",
+          "depth": "D",
+          "max": "Maks",
+          "degree": "Grad",
+          "apiKey": "API Nøgle",
+          "enterYourAPIkey": "Indtast din API nøgle",
+          "save": "Gem",
+          "refreshLayout": "Opdater Layout"
+        },
+        "zoomControl": {
+          "zoomIn": "Zoom Ind",
+          "zoomOut": "Zoom Ud",
+          "resetZoom": "Nulstil Zoom",
+          "rotateCamera": "Roter Med Uret",
+          "rotateCameraCounterClockwise": "Roter Mod Uret"
+        },
+        "layoutsControl": {
+          "startAnimation": "Fortsæt layoutanimation",
+          "stopAnimation": "Stop layoutanimation",
+          "layoutGraph": "Layout Graf",
+          "layouts": {
+            "Circular": "Cirkulær",
+            "Circlepack": "Cirkelpakning",
+            "Random": "Tilfældig",
+            "Noverlaps": "Ingen Overlappende",
+            "Force Directed": "Kraftstyret",
+            "Force Atlas": "Force Atlas"
+          }
+        },
+        "fullScreenControl": {
+          "fullScreen": "Fuld Skærm",
+          "windowed": "Vindue"
+        },
+        "legendControl": {
+          "toggleLegend": "Skift Forklaring"
+        }
+      },
+      "statusIndicator": {
+        "connected": "Forbundet",
+        "disconnected": "Afbrudt"
+      },
+      "statusCard": {
+        "unavailable": "Statusinformation utilgængelig",
+        "storageInfo": "Lagerinfo",
+        "workingDirectory": "Arbejdsmappe",
+        "inputDirectory": "Inputmappe",
+        "llmConfig": "LLM Konfiguration",
+        "llmBinding": "LLM Binding",
+        "llmBindingHost": "LLM Binding Vært",
+        "llmModel": "LLM Model",
+        "maxTokens": "Maks. Tokens",
+        "embeddingConfig": "Embedding Konfiguration",
+        "embeddingBinding": "Embedding Binding",
+        "embeddingBindingHost": "Embedding Binding Vært",
+        "embeddingModel": "Embedding Model",
+        "storageConfig": "Lagerkonfiguration",
+        "kvStorage": "KV Lager",
+        "docStatusStorage": "Dokumentstatus Lager",
+        "graphStorage": "Graf Lager",
+        "vectorStorage": "Vektor Lager"
+      },
+      "propertiesView": {
+        "editProperty": "Rediger {{property}}",
+        "editPropertyDescription": "Rediger egenskabsværdien i tekstområdet nedenfor.",
+        "errors": {
+          "duplicateName": "Nodenavn findes allerede",
+          "updateFailed": "Kunne ikke opdatere node",
+          "tryAgainLater": "Prøv venligst igen senere"
+        },
+        "success": {
+          "entityUpdated": "Node opdateret med succes",
+          "relationUpdated": "Relation opdateret med succes"
+        },
+        "node": {
+          "title": "Node",
+          "id": "ID",
+          "labels": "Etiketter",
+          "degree": "Grad",
+          "properties": "Egenskaber",
+          "relationships": "Relationer(inden for subgraf)",
+          "expandNode": "Udvid Node",
+          "pruneNode": "Beskær Node",
+          "deleteAllNodesError": "Nægter at slette alle noder i grafen",
+          "nodesRemoved": "{{count}} noder fjernet, inklusive forældreløse noder",
+          "noNewNodes": "Ingen udvidbare noder fundet",
+          "propertyNames": {
+            "description": "Beskrivelse",
+            "entity_id": "Navn",
+            "entity_type": "Type",
+            "source_id": "KildeID",
+            "Neighbour": "Nabo",
+            "file_path": "Kilde",
+            "keywords": "Nøgleord",
+            "weight": "Vægt"
+          }
+        },
+        "edge": {
+          "title": "Relation",
+          "id": "ID",
+          "type": "Type",
+          "source": "Kilde",
+          "target": "Mål",
+          "properties": "Egenskaber"
+        }
+      },
+      "search": {
+        "placeholder": "Søg noder...",
+        "message": "Og {count} andre"
+      },
+      "graphLabels": {
+        "selectTooltip": "Vælg forespørgselsetiket",
+        "noLabels": "Ingen etiketter fundet",
+        "label": "Etiket",
+        "placeholder": "Søg etiketter...",
+        "andOthers": "Og {count} andre",
+        "refreshTooltip": "Genindlæs grafdata"
+      },
+      "emptyGraph": "Grafen Er Tom"
+    },
+    "retrievePanel": {
+      "chatMessage": {
+        "copyTooltip": "Kopier til udklipsholder",
+        "copyError": "Kunne ikke kopiere tekst til udklipsholder"
+      },
+      "retrieval": {
+        "startPrompt": "Start en genfinding ved at skrive din forespørgsel nedenfor",
+        "clear": "Ryd",
+        "send": "Send",
+        "placeholder": "Skriv din forespørgsel...",
+        "error": "Fejl: Kunne ikke få svar"
+      },
+      "querySettings": {
+        "parametersTitle": "Parametre",
+        "parametersDescription": "Konfigurer dine forespørgselsparametre",
+        "queryMode": "Forespørgselstilstand",
+        "queryModeTooltip": "Vælg genfindingsstrategi:\n• Naiv: Grundlæggende søgning uden avancerede teknikker\n• Lokal: Kontekstafhængig informationsgenfinding\n• Global: Udnytter global vidensbase\n• Hybrid: Kombinerer lokal og global genfinding\n• Mix: Integrerer vidensgraf med vektorgenfinding\n• Bypass: Videresender forespørgsel direkte til LLM uden genfinding",
+        "queryModeOptions": {
+          "naive": "Naiv",
+          "local": "Lokal",
+          "global": "Global",
+          "hybrid": "Hybrid",
+          "mix": "Mix",
+          "bypass": "Bypass"
+        },
+        "responseFormat": "Svarformat",
+        "responseFormatTooltip": "Definerer svarformatet. Eksempler:\n• Flere Afsnit\n• Enkelt Afsnit\n• Punktopstilling",
+        "responseFormatOptions": {
+          "multipleParagraphs": "Flere Afsnit",
+          "singleParagraph": "Enkelt Afsnit",
+          "bulletPoints": "Punktopstilling"
+        },
+        "topK": "Top K Resultater",
+        "topKTooltip": "Antal af top-elementer der skal genfremfindes. Repræsenterer enheder i 'lokal' tilstand og relationer i 'global' tilstand",
+        "topKPlaceholder": "Antal af resultater",
+        "maxTokensTextUnit": "Maks. Tokens for Tekstenhed",
+        "maxTokensTextUnitTooltip": "Maksimalt antal tokens tilladt for hver genfremsøgt tekstdel",
+        "maxTokensGlobalContext": "Maks. Tokens for Global Kontekst",
+        "maxTokensGlobalContextTooltip": "Maksimalt antal tokens allokeret til relationsbeskrivelser i global genfremfinding",
+        "maxTokensLocalContext": "Maks. Tokens for Lokal Kontekst",
+        "maxTokensLocalContextTooltip": "Maksimalt antal tokens allokeret til enhedsbeskrivelser i lokal genfremfinding",
+        "historyTurns": "Historiske Runder",
+        "historyTurnsTooltip": "Antal komplette samtaleture (bruger-assistent par) der skal tages i betragtning i svarkonteksten",
+        "historyTurnsPlaceholder": "Antal historiske runder",
+        "hlKeywords": "Højniveau Nøgleord",
+        "hlKeywordsTooltip": "Liste over højniveau nøgleord til prioritering i genfinding. Adskil med kommaer",
+        "hlkeywordsPlaceHolder": "Indtast nøgleord",
+        "llKeywords": "Lavniveau Nøgleord",
+        "llKeywordsTooltip": "Liste over lavniveau nøgleord til forfining af genfindingsfokus. Adskil med kommaer",
+        "onlyNeedContext": "Kun Behov for Kontekst",
+        "onlyNeedContextTooltip": "Hvis Sand, returneres kun den genfremsøgte kontekst uden at generere et svar",
+        "onlyNeedPrompt": "Kun Behov for Prompt",
+        "onlyNeedPromptTooltip": "Hvis Sand, returneres kun den genererede prompt uden at producere et svar",
+        "streamResponse": "Stream Svar",
+        "streamResponseTooltip": "Hvis Sand, aktiveres streaming output for realtidssvar"
+      }
+    },
+    "apiSite": {
+      "loading": "Indlæser API Dokumentation..."
+    },
+    "apiKeyAlert": {
+      "title": "API Nøgle er påkrævet",
+      "description": "Indtast venligst din API nøgle for at få adgang til tjenesten",
+      "placeholder": "Indtast din API nøgle",
+      "save": "Gem"
+    }
+}
