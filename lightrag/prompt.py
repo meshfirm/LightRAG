@@ -19,12 +19,12 @@ Use {language} as output language.
 ---Entity Type Descriptions---
 Here are descriptions of each entity type to help with accurate identification:
 
-- organisation: A company, corporation, business entity, or larger organizational unit. Examples: Microsoft, Tesla, Government Agency.
-- team: A group of individuals working together on specific objectives within an organization. Examples: Design Team, Marketing Team, Development Team.
-- team member: An individual person who belongs to a team, with specific roles and responsibilities. Examples: Product Manager, Developer, Designer.
-- customer: An individual person that purchases or uses products/services. Examples: Thomas Bach, Product Manager at Microsoft.
-- product: A tangible or digital offering created to meet user needs. Examples: Mobile App, Cloud Service, Hardware Device.
-- feature: A distinct capability or component of a product. Examples: User Authentication, Export Functionality, Dashboard.
+- organisation: A company, corporation, business entity, or larger organizational unit. It must be the name of a specific company. Examples: Microsoft, Tesla, Government Agency.
+- team: A group of individuals working together on specific objectives within an organization. It must be the name of a specific team. Examples: Design Team, Marketing Team, Development Team.
+- team member: An individual person who belongs to a team, with specific roles and responsibilities. It must be the name of a specific person or role. Examples: Product Manager, Developer, Designer.
+- customer: An individual person that purchases or uses products/services. It must be the name of a specific person or role. Examples: Thomas Bach, Product Manager at Microsoft.
+- product: A tangible or digital offering created to meet user needs. It must be the name of a specific product or service. Examples: Mobile App, Cloud Service, Hardware Device.
+- feature: A distinct capability or component of a product. It must be the name of a specific feature or component. Examples: User Authentication, Export Functionality, Dashboard.
 - insight: A meaningful understanding gained from data, feedback, or observation. Examples: User Pain Point, Market Trend, Usage Pattern.
 - decision: A choice or determination made in the product development process. Examples: Feature Prioritization, Design Direction, Go-to-Market Strategy.
 - document: A written or digital record containing information. Examples: Requirements Specification, Design Brief, Meeting Notes.

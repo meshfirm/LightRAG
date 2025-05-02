@@ -630,16 +630,26 @@ async def pipeline_index_files(rag: LightRAG, file_paths: List[Path]):
         logger.error(traceback.format_exc())
 
 
-async def pipeline_index_texts(rag: LightRAG, texts: List[str]):
+async def pipeline_index_texts(rag: LightRAG, texts: List[str], user_id: Optional[str] = None):
     """Index a list of texts
 
     Args:
         rag: LightRAG instance
         texts: The texts to index
+        user_id: Optional user ID to associate with the texts
     """
     if not texts:
         return
-    await rag.apipeline_enqueue_documents(texts)
+        
+    # Create user-specific file path indicators for each text
+    file_paths = None
+    if user_id:
+        # Generate unique filename pattern that includes user ID
+        # This links the text to the user's workspace in Supabase
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_paths = [f"user_{user_id}/text_{timestamp}_{i}.txt" for i in range(len(texts))]
+    
+    await rag.apipeline_enqueue_documents(texts, file_paths=file_paths)
     await rag.apipeline_process_enqueue_documents()
 
 
@@ -870,7 +880,9 @@ def create_document_routes(
                 user_rag = await get_manager().get_instance(user_id)
                 logger.info(f"Using RAG instance for user: {user_id}")
             
-            background_tasks.add_task(pipeline_index_texts, user_rag, [insert_request.text])
+            # Pass the user_id to pipeline_index_texts to associate texts with the user
+            background_tasks.add_task(pipeline_index_texts, user_rag, [insert_request.text], user_id)
+            
             return InsertResponse(
                 status="success",
                 message=f"Text successfully received for {'user ' + user_id if user_id else 'system'}. Processing will continue in background.",
@@ -921,7 +933,9 @@ def create_document_routes(
                 user_rag = await get_manager().get_instance(user_id)
                 logger.info(f"Using RAG instance for user: {user_id}")
             
-            background_tasks.add_task(pipeline_index_texts, user_rag, insert_request.texts)
+            # Pass the user_id to pipeline_index_texts to associate texts with the user
+            background_tasks.add_task(pipeline_index_texts, user_rag, insert_request.texts, user_id)
+            
             return InsertResponse(
                 status="success",
                 message=f"Text successfully received for {'user ' + user_id if user_id else 'system'}. Processing will continue in background.",
