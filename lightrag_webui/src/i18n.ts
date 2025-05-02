@@ -2,6 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { useSettingsStore } from '@/stores/settings'
 
+import da from './locales/da.json'
 import en from './locales/en.json'
 import zh from './locales/zh.json'
 import fr from './locales/fr.json'
@@ -25,6 +26,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
+      da: { translation: da },
       en: { translation: en },
       zh: { translation: zh },
       fr: { translation: fr },

@@ -22,7 +22,7 @@ Here are descriptions of each entity type to help with accurate identification:
 - organisation: A company, corporation, business entity, or larger organizational unit. Examples: Microsoft, Tesla, Government Agency.
 - team: A group of individuals working together on specific objectives within an organization. Examples: Design Team, Marketing Team, Development Team.
 - team member: An individual person who belongs to a team, with specific roles and responsibilities. Examples: Product Manager, Developer, Designer.
-- customer: An individual or organization that purchases or uses products/services. Examples: Enterprise Client, Consumer User.
+- customer: An individual person that purchases or uses products/services. Examples: Thomas Bach, Product Manager at Microsoft.
 - product: A tangible or digital offering created to meet user needs. Examples: Mobile App, Cloud Service, Hardware Device.
 - feature: A distinct capability or component of a product. Examples: User Authentication, Export Functionality, Dashboard.
 - insight: A meaningful understanding gained from data, feedback, or observation. Examples: User Pain Point, Market Trend, Usage Pattern.

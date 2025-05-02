@@ -43,7 +43,7 @@
         "title": "Ryd Dokumenter",
         "description": "Dette vil fjerne alle dokumenter fra systemet",
         "warning": "ADVARSEL: Denne handling vil permanent slette alle dokumenter og kan ikke fortrydes!",
-        "confirm": "Vil du virkelig rydde alle dokumenter?",
+        "confirm": "Vil du virkelig slette alle dokumenter?",
         "confirmPrompt": "Skriv 'ja' for at bekræfte denne handling",
         "confirmPlaceholder": "Skriv ja for at bekræfte",
         "clearCache": "Ryd LLM-cache",

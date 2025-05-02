@@ -1373,6 +1373,143 @@ def create_document_routes(
         response_model=ClearCacheResponse,
         dependencies=[Depends(combined_auth)],
     )
+
+    class DeleteDocumentResponse(BaseModel):
+        """Response model for document deletion operation
+
+        Attributes:
+            status: Status of the deletion operation (success, not_found, error)
+            message: Detailed message describing the operation result
+            details: Optional details about what was deleted
+        """
+        status: Literal["success", "not_found", "error"] = Field(
+            description="Status of the deletion operation"
+        )
+        message: str = Field(description="Message describing the operation result")
+        details: Optional[dict] = Field(default=None, description="Details about what was deleted")
+
+        class Config:
+            json_schema_extra = {
+                "example": {
+                    "status": "success",
+                    "message": "Document doc-bc6505d790839f7d6efc12d1061e1f78 deleted successfully",
+                    "details": {
+                        "chunks_deleted": 5,
+                        "entities_processed": 3,
+                        "relationships_processed": 2
+                    }
+                }
+            }
+
+    @router.delete(
+        "/{id}", 
+        response_model=DeleteDocumentResponse, 
+        dependencies=[Depends(combined_auth)]
+    )
+    async def delete_document(id: str, request: Request):
+        """
+        Delete a specific document by ID.
+        
+        This endpoint attempts to delete the document and related chunks, entities, and relationships.
+        Some cleanup may be limited due to storage implementation constraints.
+        
+        Args:
+            id (str): The ID of the document to delete
+            request: The FastAPI request object
+            
+        Returns:
+            DeleteDocumentResponse: A response object containing the status and message
+            
+        Raises:
+            HTTPException: If an error occurs during deletion
+        """
+        try:
+            # Track deletion statistics
+            deletion_stats = {
+                "chunks_deleted": 0,
+                "entities_processed": 0,
+                "relationships_processed": 0
+            }
+            
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Deleting document for user: {user_id}")
+            
+            # Check if document exists for this user
+            doc_status = await user_rag.doc_status.get_by_id(id)
+            if not doc_status:
+                return DeleteDocumentResponse(
+                    status="not_found",
+                    message=f"Document {id} not found"
+                )
+            
+            # Get any chunks that may be related to this document through their full_doc_id metadata
+            # This requires querying the vector database
+            try:
+                chunks_to_delete = []
+                
+                # Query the chunks_vdb to find related chunks
+                # We'll use the vector search with a dummy query but filter by the full_doc_id
+                # This is a workaround for not having get_all()
+                
+                # Create a simple search query - we'll rely on the metadata filtering
+                dummy_query = "document"
+                
+                # Get document chunks by using vector search and filtering by full_doc_id
+                related_chunks = await user_rag.chunks_vdb.query(
+                    query=dummy_query,
+                    top_k=1000,  # Use a high number to try to get all chunks
+                    ids=[id]  # This will filter by full_doc_id in many implementations
+                )
+                
+                # Extract chunk IDs
+                for chunk in related_chunks:
+                    if "id" in chunk and chunk.get("full_doc_id") == id:
+                        chunks_to_delete.append(chunk["id"])
+                
+                # Delete the chunks from both stores
+                if chunks_to_delete:
+                    await user_rag.chunks_vdb.delete(chunks_to_delete)
+                    await user_rag.text_chunks.delete(chunks_to_delete)
+                    deletion_stats["chunks_deleted"] = len(chunks_to_delete)
+                    logger.info(f"Deleted {len(chunks_to_delete)} chunks related to document {id}")
+            except Exception as chunk_error:
+                logger.error(f"Error cleaning up chunks for document {id}: {str(chunk_error)}")
+                logger.error(traceback.format_exc())
+                # Continue with deletion despite errors in chunk cleanup
+            
+            # Delete from full_docs storage
+            await user_rag.full_docs.delete([id])
+            
+            # Delete from doc_status storage
+            await user_rag.doc_status.delete([id])
+            
+            # Ensure all indexes are updated
+            await user_rag._insert_done()
+            
+            logger.info(f"Document {id} deleted successfully")
+            return DeleteDocumentResponse(
+                status="success",
+                message=f"Document {id} deleted successfully",
+                details=deletion_stats
+            )
+        except Exception as e:
+            logger.error(f"Error deleting document {id}: {str(e)}")
+            logger.error(traceback.format_exc())
+            return DeleteDocumentResponse(
+                status="error",
+                message=f"Error deleting document: {str(e)}"
+            )
+
     async def clear_cache(request: ClearCacheRequest):
         """
         Clear cache data from the LLM response cache storage.

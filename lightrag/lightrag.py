@@ -723,7 +723,7 @@ class LightRAG:
             id_: {
                 "status": DocStatus.PENDING,
                 "content": content_data["content"],
-                "content_summary": get_content_summary(content_data["content"]),
+                "content_summary": await get_content_summary(content_data["content"]),
                 "content_length": len(content_data["content"]),
                 "created_at": datetime.now().isoformat(),
                 "updated_at": datetime.now().isoformat(),
