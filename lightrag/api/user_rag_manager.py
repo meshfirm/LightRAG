@@ -94,7 +94,7 @@ class LightRAGManager:
                 return self.instances[user_id]
             
             # Create new instance with user_id as prefix
-            user_prefix = f"user_{user_id}_"
+            user_prefix = f"{user_id}"
             
             # Get a base rag instance
             rag_instance = self.rag_factory_func()

@@ -644,10 +644,42 @@ async def pipeline_index_texts(rag: LightRAG, texts: List[str], user_id: Optiona
     # Create user-specific file path indicators for each text
     file_paths = None
     if user_id:
-        # Generate unique filename pattern that includes user ID
-        # This links the text to the user's workspace in Supabase
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_paths = [f"{user_id}/text_{timestamp}_{i}.txt" for i in range(len(texts))]
+        file_paths = []
+        for i, text in enumerate(texts):
+            # Extract the first line as the title
+            lines = text.strip().split('\n', 1)
+            title = lines[0].strip() if lines else f"untitled_{i}"
+            
+            # Sanitize the title for use as a filename
+            # Remove any characters that aren't safe for filenames
+            safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).strip()
+            safe_title = safe_title.replace(' ', '_')
+            
+            # Ensure the title isn't empty
+            if not safe_title:
+                safe_title = f"untitled_{i}"
+                
+            # Limit length to avoid overly long filenames
+            if len(safe_title) > 100:
+                safe_title = safe_title[:100]
+            
+            # Create the file path
+            file_path = f"{user_id}/{safe_title}.txt"
+            file_paths.append(file_path)
+    else:
+        # If no user ID, create file paths without user prefix
+        file_paths = []
+        for i, text in enumerate(texts):
+            lines = text.strip().split('\n', 1)
+            title = lines[0].strip() if lines else f"untitled_{i}"
+            safe_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).strip()
+            safe_title = safe_title.replace(' ', '_')
+            if not safe_title:
+                safe_title = f"untitled_{i}"
+            if len(safe_title) > 100:
+                safe_title = safe_title[:100]
+            file_path = f"{safe_title}.txt"
+            file_paths.append(file_path)
     
     await rag.apipeline_enqueue_documents(texts, file_paths=file_paths)
     await rag.apipeline_process_enqueue_documents()
@@ -813,7 +845,7 @@ def create_document_routes(
 
             # Create user-specific directory if user ID is provided
             if user_id:
-                user_dir = doc_manager.input_dir / f"user_{user_id}"
+                user_dir = doc_manager.input_dir / f"{user_id}"
                 user_dir.mkdir(exist_ok=True)
                 file_path = user_dir / file.filename
             else:

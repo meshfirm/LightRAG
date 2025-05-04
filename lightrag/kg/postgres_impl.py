@@ -82,7 +82,7 @@ class PostgreSQLDB:
             user_id: The user ID to set the workspace for. If None, the default workspace is used.
         """
         if user_id:
-            self.workspace = f"user_{user_id}"
+            self.workspace = f"{user_id}"
         else:
             # Reset to the default workspace from config
             config = ClientManager.get_config()
