@@ -647,7 +647,7 @@ async def pipeline_index_texts(rag: LightRAG, texts: List[str], user_id: Optiona
         # Generate unique filename pattern that includes user ID
         # This links the text to the user's workspace in Supabase
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_paths = [f"user_{user_id}/text_{timestamp}_{i}.txt" for i in range(len(texts))]
+        file_paths = [f"{user_id}/text_{timestamp}_{i}.txt" for i in range(len(texts))]
     
     await rag.apipeline_enqueue_documents(texts, file_paths=file_paths)
     await rag.apipeline_process_enqueue_documents()
