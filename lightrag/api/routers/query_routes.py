@@ -5,11 +5,12 @@ This module contains all query-related routes for the LightRAG API.
 import json
 import logging
 from typing import Any, Dict, List, Literal, Optional
-
-from fastapi import APIRouter, Depends, HTTPException
+from lightrag.utils import logger
+from fastapi import APIRouter, Depends, HTTPException, Request
 from lightrag.base import QueryParam
-from ..utils_api import get_combined_auth_dependency
+from ..utils_api import get_combined_auth_dependency, extract_user_id
 from pydantic import BaseModel, Field, field_validator
+from ..user_rag_manager import get_manager
 
 from ascii_colors import trace_exception
 
@@ -140,16 +141,21 @@ class QueryResponse(BaseModel):
 
 def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
     combined_auth = get_combined_auth_dependency(api_key)
+    
+    # Import the RAG manager and user ID extractor
+    from lightrag.api.user_rag_manager import get_manager
+    from lightrag.api.utils_api import extract_user_id
 
     @router.post(
         "/query", response_model=QueryResponse, dependencies=[Depends(combined_auth)]
     )
-    async def query_text(request: QueryRequest):
+    async def query_text(request_obj: Request, query_request: QueryRequest):
         """
         Handle a POST request at the /query endpoint to process user queries using RAG capabilities.
 
         Parameters:
-            request (QueryRequest): The request object containing the query parameters.
+            request_obj (Request): The FastAPI request object
+            query_request (QueryRequest): The request object containing the query parameters.
         Returns:
             QueryResponse: A Pydantic model containing the result of the query processing.
                        If a string is returned (e.g., cache hit), it's directly returned.
@@ -160,8 +166,21 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
                        with status code 500 and detail containing the exception message.
         """
         try:
-            param = request.to_query_params(False)
-            response = await rag.aquery(request.query, param=param)
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request_obj)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Processing query for user: {user_id}")
+                
+            param = query_request.to_query_params(False)
+            response = await user_rag.aquery(query_request.query, param=param)
 
             # If response is a string (e.g. cache hit), return directly
             if isinstance(response, str):
@@ -177,20 +196,33 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
             raise HTTPException(status_code=500, detail=str(e))
 
     @router.post("/query/stream", dependencies=[Depends(combined_auth)])
-    async def query_text_stream(request: QueryRequest):
+    async def query_text_stream(request_obj: Request, query_request: QueryRequest):
         """
         This endpoint performs a retrieval-augmented generation (RAG) query and streams the response.
 
         Args:
-            request (QueryRequest): The request object containing the query parameters.
-            optional_api_key (Optional[str], optional): An optional API key for authentication. Defaults to None.
+            request_obj (Request): The FastAPI request object
+            query_request (QueryRequest): The request object containing the query parameters.
 
         Returns:
             StreamingResponse: A streaming response containing the RAG query results.
         """
         try:
-            param = request.to_query_params(True)
-            response = await rag.aquery(request.query, param=param)
+            # Get user ID
+            user_id = None
+            try:
+                user_id = extract_user_id(request_obj)
+            except HTTPException:
+                logger.warning("No valid user ID provided, using system-wide storage")
+            
+            # Get user-specific RAG instance if user_id is available
+            user_rag = rag
+            if user_id:
+                user_rag = await get_manager().get_instance(user_id)
+                logger.info(f"Processing streaming query for user: {user_id}")
+                
+            param = query_request.to_query_params(True)
+            response = await user_rag.aquery(query_request.query, param=param)
 
             from fastapi.responses import StreamingResponse
 
@@ -221,5 +253,4 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
         except Exception as e:
             trace_exception(e)
             raise HTTPException(status_code=500, detail=str(e))
-
     return router

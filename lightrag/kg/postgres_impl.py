@@ -74,6 +74,19 @@ class PostgreSQLDB:
                 f"PostgreSQL, Failed to connect database at {self.host}:{self.port}/{self.database}, Got:{e}"
             )
             raise
+    
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if user_id:
+            self.workspace = f"{user_id}"
+        else:
+            # Reset to the default workspace from config
+            config = ClientManager.get_config()
+            self.workspace = config.get("workspace", "default")
 
     @staticmethod
     async def configure_age(connection: asyncpg.Connection, graph_name: str) -> None:
@@ -262,6 +275,20 @@ class ClientManager:
                         cls._instances["db"] = None
                 else:
                     await db.pool.close()
+        
+    @classmethod
+    async def get_client_for_user(cls, user_id: str | None = None) -> PostgreSQLDB:
+        """Get a client with the workspace set for a specific user.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+            
+        Returns:
+            PostgreSQLDB: The database client with the workspace set based on the user ID.
+        """
+        db = await cls.get_client()
+        db.set_user_workspace(user_id)
+        return db
 
 
 @final
@@ -280,6 +307,15 @@ class PGKVStorage(BaseKVStorage):
         if self.db is not None:
             await ClientManager.release_client(self.db)
             self.db = None
+
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     ################ QUERY METHODS ################
 
@@ -498,6 +534,15 @@ class PGVectorStorage(BaseVectorStorage):
         if self.db is not None:
             await ClientManager.release_client(self.db)
             self.db = None
+    
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     def _upsert_chunks(self, item: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         try:
@@ -530,6 +575,7 @@ class PGVectorStorage(BaseVectorStorage):
             "workspace": self.db.workspace,
             "id": item["__id__"],
             "entity_name": item["entity_name"],
+            "entity_type": item["entity_type"],
             "content": item["content"],
             "content_vector": json.dumps(item["__vector__"].tolist()),
             "chunk_ids": chunk_ids,
@@ -808,6 +854,15 @@ class PGDocStatusStorage(DocStatusStorage):
         if self.db is not None:
             await ClientManager.release_client(self.db)
             self.db = None
+    
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     async def filter_keys(self, keys: set[str]) -> set[str]:
         """Filter out duplicated content"""
@@ -1035,6 +1090,15 @@ class PGGraphStorage(BaseGraphStorage):
     async def index_done_callback(self) -> None:
         # PG handles persistence automatically
         pass
+
+    def set_user_workspace(self, user_id: str | None = None):
+        """Set the workspace based on the user ID.
+        
+        Args:
+            user_id: The user ID to set the workspace for. If None, the default workspace is used.
+        """
+        if self.db:
+            self.db.set_user_workspace(user_id)
 
     @staticmethod
     def _record_to_dict(record: asyncpg.Record) -> dict[str, Any]:
@@ -1661,6 +1725,7 @@ TABLES = {
                     id VARCHAR(255),
                     workspace VARCHAR(255),
                     entity_name VARCHAR(255),
+                    entity_type TEXT,
                     content TEXT,
                     content_vector VECTOR,
                     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1767,11 +1832,12 @@ SQL_TEMPLATES = {
                       update_time = CURRENT_TIMESTAMP
                      """,
     # SQL for VectorStorage
-    "upsert_entity": """INSERT INTO LIGHTRAG_VDB_ENTITY (workspace, id, entity_name, content,
+    "upsert_entity": """INSERT INTO LIGHTRAG_VDB_ENTITY (workspace, id, entity_name, entity_type, content,
                       content_vector, chunk_ids, file_path)
-                      VALUES ($1, $2, $3, $4, $5, $6::varchar[], $7)
+                      VALUES ($1, $2, $3, $4, $5, $6, $7::varchar[], $8)
                       ON CONFLICT (workspace,id) DO UPDATE
                       SET entity_name=EXCLUDED.entity_name,
+                      entity_type=EXCLUDED.entity_type,
                       content=EXCLUDED.content,
                       content_vector=EXCLUDED.content_vector,
                       chunk_ids=EXCLUDED.chunk_ids,
