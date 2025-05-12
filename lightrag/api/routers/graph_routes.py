@@ -170,7 +170,8 @@ def create_graph_routes(rag, api_key: Optional[str] = None):
             try:
                 user_id = extract_user_id(request)
             except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+                logger.warning("No valid user ID provided")
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
             # Get user-specific RAG instance if user_id is available
             user_rag = rag
@@ -217,7 +218,8 @@ def create_graph_routes(rag, api_key: Optional[str] = None):
             try:
                 user_id = extract_user_id(request)
             except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+                logger.warning("No valid user ID provided")
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
             # Get user-specific RAG instance if user_id is available
             user_rag = rag

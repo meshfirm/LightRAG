@@ -167,18 +167,14 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
         """
         try:
             # Get user ID
-            user_id = None
-            try:
-                user_id = extract_user_id(request_obj)
-            except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+            user_id = extract_user_id(request_obj)
+            if not user_id:
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
-            # Get user-specific RAG instance if user_id is available
-            user_rag = rag
-            if user_id:
-                user_rag = await get_manager().get_instance(user_id)
-                logger.info(f"Processing query for user: {user_id}")
-                
+            # Get user-specific RAG instance
+            user_rag = await get_manager().get_instance(user_id)
+            logger.info(f"Processing query for user: {user_id}")
+            
             param = query_request.to_query_params(False)
             response = await user_rag.aquery(query_request.query, param=param)
 
@@ -209,18 +205,14 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
         """
         try:
             # Get user ID
-            user_id = None
-            try:
-                user_id = extract_user_id(request_obj)
-            except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+            user_id = extract_user_id(request_obj)
+            if not user_id:
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
-            # Get user-specific RAG instance if user_id is available
-            user_rag = rag
-            if user_id:
-                user_rag = await get_manager().get_instance(user_id)
-                logger.info(f"Processing streaming query for user: {user_id}")
-                
+            # Get user-specific RAG instance
+            user_rag = await get_manager().get_instance(user_id)
+            logger.info(f"Processing streaming query for user: {user_id}")
+            
             param = query_request.to_query_params(True)
             response = await user_rag.aquery(query_request.query, param=param)
 

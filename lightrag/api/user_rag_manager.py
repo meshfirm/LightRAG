@@ -102,11 +102,11 @@ class LightRAGManager:
             # Set the namespace prefix for this user
             rag_instance.namespace_prefix = user_prefix
             
-            # Set the workspace for all storage classes
-            self._set_user_workspace(rag_instance, user_id)
-            
-            # Initialize storages
+            # Initialize storages first
             await rag_instance.initialize_storages()
+            
+            # Then set the workspace for all storage classes
+            self._set_user_workspace(rag_instance, user_id)
             
             # Store and return the instance
             self.instances[user_id] = rag_instance

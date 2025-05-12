@@ -774,6 +774,7 @@ def create_document_routes(
             # Try to get user ID for user-specific scanning
             user_id = extract_user_id(request)
             user_rag = await get_manager().get_instance(user_id)
+            logger.info(f"Started scanning process for user: {user_id}")
             
             # Start the scanning process in the background for the user's RAG instance
             background_tasks.add_task(run_scanning_process, user_rag, doc_manager)
@@ -828,8 +829,13 @@ def create_document_routes(
             user_id = None
             try:
                 user_id = extract_user_id(request)
+                logger.info(f"(SIND-286) (document_routes | /upload) User ID: {user_id}")
             except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+                logger.error("(SIND-286) (document_routes | /upload) No valid user ID provided")
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
+            
+            if not user_id:
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
             # Get user-specific RAG instance if user_id is available
             user_rag = rag
@@ -903,14 +909,19 @@ def create_document_routes(
             user_id = None
             try:
                 user_id = extract_user_id(request)
+                logger.info(f"(SIND-286) (document_routes | /text) User ID: {user_id}")
             except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+                logger.error("(SIND-286) (document_routes | /text) No valid user ID provided")
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
+            
+            
+            if not user_id:
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
             # Get user-specific RAG instance if user_id is available
-            user_rag = rag
-            if user_id:
-                user_rag = await get_manager().get_instance(user_id)
-                logger.info(f"Using RAG instance for user: {user_id}")
+            user_rag = await get_manager().get_instance(user_id)
+            logger.info(f"Using RAG instance for user: {user_id}")
+                
             
             # Pass the user_id to pipeline_index_texts to associate texts with the user
             background_tasks.add_task(pipeline_index_texts, user_rag, [insert_request.text], user_id)
@@ -957,7 +968,8 @@ def create_document_routes(
             try:
                 user_id = extract_user_id(request)
             except HTTPException:
-                logger.warning("No valid user ID provided, using system-wide storage")
+                logger.warning("No valid user ID provided")
+                raise HTTPException(status_code=400, detail="No valid user ID provided")
             
             # Get user-specific RAG instance if user_id is available
             user_rag = rag
