@@ -13,6 +13,7 @@ env/
 venv/
 *.env*
 .env_example
+lightrag_venv/
 
 # Build / Distribution
 dist/
