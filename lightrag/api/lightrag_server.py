@@ -62,9 +62,6 @@ from lightrag.api.auth import auth_handler
 load_dotenv(dotenv_path=".env", override=False)
 
 
-webui_title = os.getenv("WEBUI_TITLE")
-webui_description = os.getenv("WEBUI_DESCRIPTION")
-
 # Initialize config parser
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -363,10 +360,7 @@ def create_app(args):
     ollama_api = OllamaAPI(rag, top_k=args.top_k, api_key=api_key)
     app.include_router(ollama_api.router, prefix="/api")
 
-    @app.get("/")
-    async def redirect_to_webui():
-        """Redirect root path to /webui"""
-        return RedirectResponse(url="/webui")
+
 
     @app.get("/auth-status")
     async def get_auth_status():
@@ -385,17 +379,13 @@ def create_app(args):
                 "message": "Authentication is disabled. Using guest access.",
                 "core_version": core_version,
                 "api_version": __api_version__,
-                "webui_title": webui_title,
-                "webui_description": webui_description,
             }
 
         return {
             "auth_configured": True,
             "auth_mode": "enabled",
             "core_version": core_version,
-            "api_version": __api_version__,
-            "webui_title": webui_title,
-            "webui_description": webui_description,
+            "api_version": __api_version__,            
         }
 
     @app.post("/login")
@@ -412,8 +402,6 @@ def create_app(args):
                 "message": "Authentication is disabled. Using guest access.",
                 "core_version": core_version,
                 "api_version": __api_version__,
-                "webui_title": webui_title,
-                "webui_description": webui_description,
             }
         username = form_data.username
         if auth_handler.accounts.get(username) != form_data.password:
@@ -431,8 +419,6 @@ def create_app(args):
             "auth_mode": "enabled",
             "core_version": core_version,
             "api_version": __api_version__,
-            "webui_title": webui_title,
-            "webui_description": webui_description,
         }
 
     @app.get("/health", dependencies=[Depends(combined_auth)])
@@ -471,8 +457,6 @@ def create_app(args):
                 "pipeline_busy": pipeline_status.get("busy", False),
                 "core_version": core_version,
                 "api_version": __api_version__,
-                "webui_title": webui_title,
-                "webui_description": webui_description,
             }
         except Exception as e:
             logger.error(f"Error getting health status: {str(e)}")
@@ -489,16 +473,6 @@ def create_app(args):
                 response.headers["Pragma"] = "no-cache"
                 response.headers["Expires"] = "0"
             return response
-
-    # Webui mount webui/index.html
-    static_dir = Path(__file__).parent / "webui"
-    static_dir.mkdir(exist_ok=True)
-    app.mount(
-        "/webui",
-        NoCacheStaticFiles(directory=static_dir, html=True, check_dir=True),
-        name="webui",
-    )
-
     return app
 
 
